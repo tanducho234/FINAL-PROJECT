@@ -9,6 +9,22 @@ class UserRepository {
   async getUserByUsername(username) {
     return await User.findOne({ username });
   }
+
+  async updateUserEmailVerification(email, verified = true) {
+    try {
+      const user = await User.findOneAndUpdate(
+        { email },
+        { $set: { emailVerified: verified } },
+        { new: true }
+      );
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }
 
 module.exports = new UserRepository();
