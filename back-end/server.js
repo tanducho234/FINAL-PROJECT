@@ -19,7 +19,6 @@ connectToDatabase();
 
 const authMiddleware = require("./src/middlewares/authMiddleware");
 // Routes
-// app.use("/products", productRoutes);
 app.use("/users", userRoutes);
 
 // Start the server
