@@ -10,7 +10,11 @@ class UserRepository {
     return await User.findOne({ username });
   }
 
-  async updateUserEmailVerification(email, verified = true) {
+  async getUserByEmail(email) {
+    return await User.findOne({ email });
+  }
+
+  async updateUserEmailVerificationStatus(email, verified = true) {
     try {
       const user = await User.findOneAndUpdate(
         { email },

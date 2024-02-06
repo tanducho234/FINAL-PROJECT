@@ -34,6 +34,7 @@ class UserController {
       };
 
       const role = await Role.findOne({ roleName: 'User' });
+      console.log(role);
       const user = await userRepository.createUser({
         username,
         password: hashedPassword,
@@ -106,7 +107,7 @@ class UserController {
       // const user = await userRepository.findOne({ email: decoded.email });
       // Update user's verification status in the database
       console.log(decoded);
-      const updatedUser = await userRepository.updateUserEmailVerification(decoded.email, true);
+      const updatedUser = await userRepository.updateUserEmailVerificationStatus(decoded.email, true);
       res.status(200).json({ message: "Email verified successfully" });
     } catch (err) {
       console.error(err);
