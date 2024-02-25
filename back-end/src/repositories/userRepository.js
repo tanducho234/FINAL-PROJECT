@@ -14,10 +14,10 @@ class UserRepository {
     return await User.findOne({ email });
   }
 
-  async updateUserEmailVerificationStatus(email, verified = true) {
+  async updateUserEmailVerificationStatus(username, verified = true) {
     try {
       const user = await User.findOneAndUpdate(
-        { email },
+        { username },
         { $set: { emailVerified: verified } },
         { new: true }
       );

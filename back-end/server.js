@@ -1,14 +1,17 @@
 // server.js
 const express = require("express");
+const app = express();
+
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+
 // const productRoutes = require("./src/routes/productRoutes");
 const connectToDatabase = require("./config/database");
 const userRoutes = require("./src/routes/userRoutes");
 const bookRoutes = require("./src/routes/bookRoutes");
 
 dotenv.config();
-const app = express();
+
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -24,6 +27,9 @@ connectToDatabase();
 app.use("/users", userRoutes);
 app.use("/books",authMiddleware, bookRoutes);
 
+app.get("/", (req, res) => {
+  res.json({msg: 'welcome'});
+});
 
 // Start the server
 app.listen(PORT, () => {

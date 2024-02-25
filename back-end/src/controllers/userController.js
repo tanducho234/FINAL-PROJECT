@@ -18,9 +18,15 @@ class UserController {
     try {
 
       const { username, password, email } = req.body;
+
+      if (await userRepository.getUserByUsername(username)) {
+        console.log('Username already exists');
+        return res.status(400).json({ message: 'Username already exists' });
+      }
+
       const hashedPassword = await bcrypt.hash(password, 10);
       // Generate an email verification token
-      const verificationToken = jwt.sign({ email }, secretKey, { expiresIn: '1d' });
+      const verificationToken = jwt.sign({ username }, secretKey, { expiresIn: '1d' });
 
       //getBaseUrl
       const protocol = req.protocol;
@@ -30,9 +36,11 @@ class UserController {
         from: GMAIL_USERNAME, // Replace with your email address
         to: email,
         subject: 'Email Verification',
-        html: `<p>Click the following link to verify your email:</p><a href="${baseUrl}/users/verify/${verificationToken}">Verify Email</a>`,
+        html: `<p>Hello ${username},</p>
+               <p>Click the following link to verify your email:</p>
+               <a href="${baseUrl}/users/verify/${verificationToken}">Verify Email</a>`
       };
-
+      
       const role = await Role.findOne({ roleName: 'User' });
       console.log(role);
       const user = await userRepository.createUser({
@@ -52,7 +60,7 @@ class UserController {
           pass: GMAIL_PASSWORD, // Replace with your email password
         },
       });
-
+      res.status(201).json({ message: "User registered successfully. Check your email for verification instructions." });
       try {
         // Send the email
         const info = await transporter.sendMail(mailOptions);
@@ -61,7 +69,6 @@ class UserController {
         console.error('Error sending email:', error);
         throw new Error('Failed to send verification email');
       }
-      res.status(201).json({ message: "User registered successfully. Check your email for verification instructions." });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Unable to register user" });
@@ -84,7 +91,7 @@ class UserController {
       }
       // Check if the user's email is verified
       if (!user.emailVerified) {
-        return res.status(401).json({ error: "Email not verified. Please verify your email to log in." });
+        return res.status(401).json({ message: "Email not verified. Please verify your email to log in." });
       }
       const token = jwt.sign(
         { id: user._id, username: user.username },
@@ -107,7 +114,7 @@ class UserController {
       // const user = await userRepository.findOne({ email: decoded.email });
       // Update user's verification status in the database
       console.log(decoded);
-      const updatedUser = await userRepository.updateUserEmailVerificationStatus(decoded.email, true);
+      const updatedUser = await userRepository.updateUserEmailVerificationStatus(decoded.username, true);
       res.status(200).json({ message: "Email verified successfully" });
     } catch (err) {
       console.error(err);
