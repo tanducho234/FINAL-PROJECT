@@ -6,6 +6,9 @@ class BookController {
         try {
             const { title, author, genre, ISBN } = req.body;
             const owner = req.user.id
+            console.log(owner)
+            console.log(title)
+            console.log(req.body)
             const book = await bookRepository.createBook(
                 {
                     title,

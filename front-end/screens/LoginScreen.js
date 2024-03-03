@@ -3,19 +3,21 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, Image } from 'react-n
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 const LoginScreen = ({route,navigation}) => {
-  const { handleLoginSuccess } = route.params;
+  const { setIsAuthenticated } = route.params;
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
-    axios.post(`http://192.168.0.35:3000/users/login`, {
+    console.log('handle login')
+    axios.post(`http://localhost:3000/login`, {
       username: username,
       password: password,
     })
       .then(async res =>   {
         console.log('login thanh cong')
         await AsyncStorage.setItem('token', res.data.token);
-        handleLoginSuccess();
+        setIsAuthenticated(true)
+        // navigation.navigate('Home',{ username: 'exampleUser' });
       } )
       .catch(error => Alert.alert(
         'Login Failed',

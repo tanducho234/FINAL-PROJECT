@@ -1,9 +1,9 @@
-// routes/userRoutes.js
+// routes/loginroutes.js
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
 
-// Register a new user
-router.get("/profile", userController.profile);
+// Login user and get JWT token
+router.post("/", userController.loginUser);
 
 module.exports = router;

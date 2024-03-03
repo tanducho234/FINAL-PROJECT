@@ -43,7 +43,8 @@ const RegisterScreen = ({ navigation }) => {
     console.log(email)
     console.log(username)
     console.log(password)
-    axios.post(`http://192.168.0.35:3000/users/register`, {
+    
+    axios.post(`http://localhost:3000/register`, {
       username: username,
       email: email,
       password: password,

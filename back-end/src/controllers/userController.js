@@ -38,7 +38,7 @@ class UserController {
         subject: 'Email Verification',
         html: `<p>Hello ${username},</p>
                <p>Click the following link to verify your email:</p>
-               <a href="${baseUrl}/users/verify/${verificationToken}">Verify Email</a>`
+               <a href="${baseUrl}/register/verify/${verificationToken}">Verify Email</a>`
       };
       
       const role = await Role.findOne({ roleName: 'User' });
@@ -81,13 +81,13 @@ class UserController {
       const user = await userRepository.getUserByUsername(username);
 
       if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
+        return res.status(401).json({ message: "Wrong password or username" });
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
-        return res.status(401).json({ error: "Invalid credentials" });
+        return res.status(401).json({ message: "Invalid credentials" });
       }
       // Check if the user's email is verified
       if (!user.emailVerified) {
@@ -100,7 +100,7 @@ class UserController {
       );
       res.json({ token });
     } catch (err) {
-      res.status(500).json({ error: "Unable to log in" });
+      res.status(500).json({ message: "Unable to log in" });
     }
   }
 
@@ -121,6 +121,19 @@ class UserController {
       res.status(400).json({ error: "Invalid or expired token" });
     }
   }
+
+  async profile(req, res) {
+    try {
+        const userName = req.user.username
+        console.log(userName);
+        const userInfor= await userRepository.getUserByUsername(userName)
+        console.log(userInfor);
+        res.status(200).json(userInfor);
+    } catch (err) {
+        res.status(500).json({ message: "profile not found" });
+    }
+}
+
 
 
 }
