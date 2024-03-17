@@ -8,6 +8,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+import UploadPicture from "./screens/UploadPicture";
 import LoadingScreen from "./screens/LoadingScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from './screens/RegisterScreen';
@@ -121,6 +122,16 @@ const App = () => {
               component={Feed}
               options={{
                 tabBarLabel: 'Home',
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialCommunityIcons name="home" color={color} size={size} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="upload"
+              component={UploadPicture}
+              options={{
+                tabBarLabel: 'Upload',
                 tabBarIcon: ({ color, size }) => (
                   <MaterialCommunityIcons name="home" color={color} size={size} />
                 ),

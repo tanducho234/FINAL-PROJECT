@@ -87,7 +87,7 @@ class UserController {
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ message: "Wrong password or username" });
       }
       // Check if the user's email is verified
       if (!user.emailVerified) {
@@ -125,15 +125,41 @@ class UserController {
   async profile(req, res) {
     try {
         const userName = req.user.username
-        console.log(userName);
+        console.log('ABCDE',req.user);
         const userInfor= await userRepository.getUserByUsername(userName)
-        console.log(userInfor);
+        // console.log(userInfor);
         res.status(200).json(userInfor);
     } catch (err) {
         res.status(500).json({ message: "profile not found" });
     }
+
 }
 
+async updateProfile(req, res) {
+  const userName = req.user.username
+  console.log('ABCDE',req.user);
+  const { firstname, lastname, bio, address } = req.body; // Assuming these are the fields to be updated
+  console.log('firstname', firstname);
+  try {
+    const user= await userRepository.getUserByUsername(userName)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (bio) user.bio = bio;
+    if (address) user.address = address;
+    if (firstname) user.firstName = firstname;
+    if (lastname) user.lastName = lastname;
+  
+
+    // Save the updated user object
+    await user.save();
+    // Return the updated user object
+    res.json({ message: 'Profile updated successfully', user });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ error: 'Unable to update profile' });
+  }
+}
 
 
 }

@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView,Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity,Button, ScrollView,Alert,StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,12 +11,12 @@ const EditProfile = ({ navigation }) => {
   const [address, setAddress] = useState('');
   const [bio, setBio] = useState('');
   const [email, setEmail] = useState('');
+  const [buttonStatus, setButtonStatus] = useState(false);
   useEffect(() => {
     // Function to fetch user data
     const fetchUserData = async () => {
       console.log("fetchUserData")
       const token = await AsyncStorage.getItem('token');
-      console.log(token)
     axios.get(`http://localhost:3000/users/profile`, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -26,6 +26,10 @@ const EditProfile = ({ navigation }) => {
         console.log('fetchUserData thanh cong')
         console.log(res.data);
         setEmail(res.data.email)
+        setAddress(res.data.address)
+        setFirstName(res.data.firstName)
+        setLastName(res.data.lastName)
+        setBio(res.data.bio)
       } )
       .catch(error => Alert.alert(
         'fetchUserData fail ',
@@ -39,7 +43,7 @@ const EditProfile = ({ navigation }) => {
   }, []);
 
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     // Add your logic to save the profile changes
     // This could involve making an API call to update the user's profile
     // For simplicity, we'll just log the changes for now
@@ -48,12 +52,39 @@ const EditProfile = ({ navigation }) => {
     console.log('Last Name:', lastName);
     console.log('Address:', address);
     console.log('Bio:', bio);
+
+    const token = await AsyncStorage.getItem('token');
+    axios.post(
+      `http://localhost:3000/users/profile`,
+      {
+        firstname: firstName,
+        lastname: lastName,
+        address: address,
+        bio: bio,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      }
+    )
+    .then(res => Alert.alert(
+      'Success!',
+      res.data.message,
+      [{ text: 'Ok', onPress: () => navigation.goBack() }]
+    ))
+      .catch(error => Alert.alert(
+        'fetchUserData fail ',
+        error.response.data.message,
+        [{ text: 'OK', onPress: () => console.log('OK pressed') }]
+      ));
+
     // You can then navigate back to the profile view or perform any other action as needed
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-      <View style={{ marginHorizontal: 12 }}>
+     <SafeAreaView style={{ flex: 1, backgroundColor: 'white', alignItems: 'stretch', }}>
+      <View style={{ marginHorizontal: 30}}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={{
@@ -73,51 +104,109 @@ const EditProfile = ({ navigation }) => {
           <View>
             <Text style={{ marginBottom: 5 }}>Email</Text>
             <TextInput
-              style={{ marginBottom: 10, paddingVertical: 8, paddingHorizontal: 10, borderColor: '#ccc', borderWidth: 1 }}
+              style={styles.input}
               value={email}
               editable={false}
               color='gray'
-              
             />
             <Text style={{ marginBottom: 5 }}>First Name</Text>
             <TextInput
-              style={{ marginBottom: 10, paddingVertical: 8, paddingHorizontal: 10, borderColor: '#ccc', borderWidth: 1 }}
+              style={styles.input}
               value={firstName}
-              onChangeText={setFirstName}
-            />
+              onChangeText={ (text)=>{
+                setFirstName(text);
+                // console.log(firstName)
+                setButtonStatus(true);
+              }}      
+              
+              />
             <Text style={{ marginBottom: 5 }}>Last Name</Text>
             <TextInput
-              style={{ marginBottom: 10, paddingVertical: 8, paddingHorizontal: 10, borderColor: '#ccc', borderWidth: 1 }}
+              style={styles.input}
               value={lastName}
-              onChangeText={setLastName}
-            />
+              onChangeText={ (text)=>{
+                setLastName(text)
+                setButtonStatus(true);
+              }}            />
             <Text style={{ marginBottom: 5 }}>Address</Text>
             <TextInput
-              style={{ marginBottom: 10, paddingVertical: 8, paddingHorizontal: 10, borderColor: '#ccc', borderWidth: 1 }}
+              style={styles.input}
               value={address}
-              onChangeText={setAddress}
-            />
+              onChangeText={ (text)=>{
+                setAddress(text)
+                setButtonStatus(true);
+              }}            />
             <Text style={{ marginBottom: 5 }}>Bio</Text>
             <TextInput
-              style={{ marginBottom: 10, paddingVertical: 8, paddingHorizontal: 10, borderColor: '#ccc', borderWidth: 1 }}
+              style={[styles.input, { height: 80 }]} // Additional height for multiline input
               multiline
               numberOfLines={4}
               value={bio}
-              onChangeText={setBio}
+              onChangeText={ (text)=>{
+                setBio(text)
+                setButtonStatus(true);
+              }}
             />
           </View>
         </ScrollView>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={{ backgroundColor: 'blue', padding: 10, borderRadius: 5, marginTop: 10 }}
           onPress={handleSaveProfile}
+          disabled= {buttonStatus} // Disable the button if the form is not valid
+          
         >
-          <Text style={{ color: 'white', textAlign: 'center', fontWeight: 'bold' }}>Save Profile</Text>
-        </TouchableOpacity>
+          <Text style={styles.button
+        }
+        disabled= {buttonStatus}
+        >Save Profile</Text>
+        </TouchableOpacity> */}
+        <View style={[styles.button,{alignItems:'center'}]}
+        backgroundColor={buttonStatus ? 'green' : 'gray'}>
+        <Button
+          disabled= {!buttonStatus} // Disable the button if the form is not valid
+          title="Save"
+          color="white"
+          onPress={handleSaveProfile}
+        />
+      </View>
       </View>
     </SafeAreaView>
   );
 };
 
+  const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'top',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: 'white',
+  },
+  button: {
+    marginBottom: 20,
+    borderRadius: 50,
+    width: '50%',
+    alignSelf: 'center', // To center horizontally
+  },
+  input: {
+    width: '100%',
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 2,
+    borderRadius: 10,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  registerText: {
+    marginTop: 20,
+    color: 'blue',
+  },
+  image: {
+    width: 140,
+    height: 140,
+    marginBottom: 20,
+  },
+});
 
 export default EditProfile;

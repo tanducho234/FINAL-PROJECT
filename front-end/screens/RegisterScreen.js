@@ -10,7 +10,7 @@ const RegisterScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const usernameInputRef = useRef(null);
   const [borderColor, setBorderColor] = useState('green'); // Initial border color
-  const isButtonDisabled = !username || !email || !password || !confirmPassword;
+  const isButtonDisabled = !username || !email || !password || !confirmPassword || confirmPassword!=password;
   const [isConfirmPasswordMatch, setIsConfirmPasswordMatch] = useState(true);;
 
 
@@ -102,6 +102,7 @@ const RegisterScreen = ({ navigation }) => {
       </Text>
       <View style={styles.button}
         disabled={isButtonDisabled}
+        backgroundColor={isButtonDisabled ? 'gray' : 'green'}
       >
         <Button title="Register"
           color={'white'}
