@@ -7,7 +7,7 @@ class BookRepository {
   }
 
   async getAllBooksByOwnerId(userId) {
-    return await Book.find({ owner: userId });
+    return await Book.find({ ownerId: userId });
   }
 
   async getBookById(id) {

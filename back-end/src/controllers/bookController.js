@@ -1,31 +1,61 @@
 // controllers/bookController.js
 const bookRepository = require("../repositories/bookRepository");
+// repositories/BookRepository.js
+const Book = require("../models/book");
+const { upload, bucket } = require('../../config/firebase');
 
 class BookController {
     async createBook(req, res) {
+        console.log("UPLOAD file", req.file)
+      
+        ///////
         try {
-            const { title, author, genre, ISBN } = req.body;
-            const owner = req.user.id
-            console.log(owner)
-            console.log(title)
-            console.log(req.body)
+            const { title, author, genres, ISBN, desc } = req.body;
+            const genresArray = genres.split(',')
+            console.log('genres', genresArray)
+            ///////upload image
+            if (!req.file) {
+                console.log("UPLOAD2")
+                console.log('req.image', req.image)
+                return res.status(400).json({ message: 'No file uploaded' });
+            }
+            const fileName = Date.now() + req.file.originalname;
+            const file = bucket.file(fileName);
+
+            // Upload the file to Firebase Storage
+            await file.save(req.file.buffer, {
+                metadata: {
+                    contentType: req.file.mimetype
+                }
+            });
+
+            // Get the image path
+            const imagePath = `${fileName}`;
+
+            ////
+
+            const ownerId = req.user.id
             const book = await bookRepository.createBook(
                 {
                     title,
                     author,
-                    genre,
+                    genres: genresArray,
                     ISBN,
-                    owner
+                    ownerId,
+                    imagePath,
                 }
             );
+            console.log('asdasdasda')
             res.status(201).json(book);
         } catch (err) {
+            console.log(err)
             res.status(500).json({ error: "Unable to create the book" });
         }
     }
 
     async getAllBooksByOwner(req, res) {
         try {
+            console.log('getAllBooksByOwner', req.user.id)
             const books = await bookRepository.getAllBooksByOwnerId(req.user.id);
             res.json(books);
         } catch (err) {

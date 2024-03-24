@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.22.3",
+    "@react-native-community/checkbox": "^0.5.17",
     "@react-native-picker/picker": "2.4.10",
     "@react-navigation/bottom-tabs": "^6.5.16",
     "@react-navigation/native": "^6.1.7",
@@ -19,12 +20,13 @@
     "asyncstorage": "^1.5.0",
     "axios": "^1.6.7",
     "expo": "~49.0.8",
-    "expo-checkbox": "~2.4.0",
     "expo-image-picker": "^14.7.1",
     "expo-status-bar": "~1.6.0",
     "react": "18.2.0",
     "react-native": "0.72.4",
-    "react-native-ios-picker": "^1.0.0"
+    "react-native-ios-picker": "^1.0.0",
+    "react-native-modal": "^13.0.1",
+    "expo-checkbox": "~2.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const bookController = require("../controllers/bookController");
+const { upload, bucket } = require('../../config/firebase');
 
 // Create a new book
-router.post("/", bookController.createBook);
+router.post("/",upload.single('image'), bookController.createBook);
 
 // Get all books
 router.get("/", bookController.getAllBooksByOwner);

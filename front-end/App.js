@@ -13,11 +13,13 @@ import LoadingScreen from "./screens/LoadingScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from './screens/RegisterScreen';
 import LandingScreen from './screens/LandingScreen';
-import SettingsScreen from './screens/Settings/SettingsScreen'; 
+import SettingsScreen from './screens/Settings/SettingsScreen';
 import EditProfileScreen from './screens/Settings/EditProfileScreen';
+import AddBookScreen from './screens/MyBooks/AddBookScreen';
 // import { MaterialIcons } from '@expo/vector-icons';
 
 import { LogBox } from 'react-native';
+import MyBooksScreen from './screens/MyBooks/MyBookScreen';
 
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
@@ -47,11 +49,57 @@ function Settings({ route }) {
   const { handleLogoutSuccess } = route.params;
 
   return (
-   <Stack.Navigator>
-     <Stack.Screen name="Settings" options={{headerShown:false}} component={SettingsScreen} 
-     initialParams={{ handleLogoutSuccess }}/>
-    <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{headerShown:false}}/>
-   </Stack.Navigator>
+    <Stack.Navigator>
+      <Stack.Screen name="Settings"
+        options={{
+          headerShown: true, headerTitleStyle: {
+            fontSize: 20,
+            fontWeight: 'bold', // Change the font size to 30
+          },
+        }} 
+        component={SettingsScreen}
+        initialParams={{ handleLogoutSuccess }} />
+      <Stack.Screen name="EditProfile" 
+      component={EditProfileScreen} 
+      options={{
+        headerTitle: 'Edit Profile',
+        headerShown: true, headerTitleStyle: {
+          fontSize: 20,
+          fontWeight: 'bold', // Change the font size to 30
+        },
+      }}/>
+    </Stack.Navigator>
+  );
+}
+
+function MyBook({ route }) {
+  // const { handleLogoutSuccess } = route.params;
+
+  return (
+    // <Stack.Navigator>
+    //   <Stack.Screen name="BookList" options={{ headerShown: false }} component={MyBooksScreen} />
+    //   <Stack.Screen name="AddBook" component={AddBookScreen} options={{ headerShown: false }} />
+    // </Stack.Navigator>
+    <Stack.Navigator>
+      <Stack.Screen name="MyBooks"
+        options={{
+          headerTitle: 'My Books',
+          headerShown: true, headerTitleStyle: {
+            fontSize: 20,
+            fontWeight: 'bold', // Change the font size to 30
+          },
+        }} 
+        component={MyBooksScreen} />
+      <Stack.Screen name="AddBook" 
+      options={{
+        headerTitle: 'Add New Book ',
+        headerShown: true, headerTitleStyle: {
+          fontSize: 20,
+          fontWeight: 'bold', // Change the font size to 30
+        },
+      }}
+      component={AddBookScreen} />
+    </Stack.Navigator>
   );
 }
 
@@ -112,7 +160,7 @@ const App = () => {
       {isLoading ? <LoadingScreen /> : (
         isAuthenticated ?
           <Tab.Navigator
-            initialRouteName="SettingsTab"
+            initialRouteName="MyBook"
             screenOptions={{
               tabBarActiveTintColor: '#e91e63',
             }}
@@ -128,12 +176,13 @@ const App = () => {
               }}
             />
             <Tab.Screen
-              name="upload"
-              component={UploadPicture}
+              name="MyBook"
+              component={MyBook}
               options={{
-                tabBarLabel: 'Upload',
+                headerShown: false,
+                tabBarLabel: 'My Books',
                 tabBarIcon: ({ color, size }) => (
-                  <MaterialCommunityIcons name="home" color={color} size={size} />
+                  <MaterialCommunityIcons name="book" color={color} size={size} />
                 ),
               }}
             />
@@ -152,7 +201,7 @@ const App = () => {
               component={Settings}
               initialParams={{ handleLogoutSuccess }}
               options={{
-                headerShown:false,
+                headerShown: false,
                 tabBarLabel: 'Settings',
                 tabBarIcon: ({ color, size }) => (
                   <MaterialCommunityIcons name="account" color={color} size={size} />
@@ -164,9 +213,9 @@ const App = () => {
           :
           <Stack.Navigator initialRouteName="Landing">
             <Stack.Screen name="Landing" component={LandingScreen} options={{ headerShown: false, title: '' }} />
-            <Stack.Group screenOptions={{ presentation: 'modal' , gestureEnabled: false, headerShown: false}}>
-              <Stack.Screen name="Login" component={LoginScreen} initialParams={{ setIsAuthenticated }} options={{ headerShown: true , title: 'Login'}} />
-              <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: true , title: 'Register'}} />
+            <Stack.Group screenOptions={{ presentation: 'modal', gestureEnabled: false, headerShown: false }}>
+              <Stack.Screen name="Login" component={LoginScreen} initialParams={{ setIsAuthenticated }} options={{ headerShown: true, title: 'Login' }} />
+              <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: true, title: 'Register' }} />
             </Stack.Group>
 
           </Stack.Navigator>

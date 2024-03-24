@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity,Button, ScrollView,Alert,StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity,Button, ScrollView,Alert,StyleSheet,Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -83,22 +83,22 @@ const EditProfile = ({ navigation }) => {
   };
 
   return (
-     <SafeAreaView style={{ flex: 1, backgroundColor: 'white', alignItems: 'stretch', }}>
+    //  <SafeAreaView style={{ flex: 1, backgroundColor: 'red', alignItems: 'stretch' ,paddingTop:-10}}>
       <View style={{ marginHorizontal: 30}}>
-        <TouchableOpacity
+      {/* <Pressable
           onPress={() => navigation.goBack()}
           style={{
-            position: 'absolute',
+            position: "absolute",
             left: 0,
             paddingHorizontal: 12,
             paddingVertical: 8,
           }}
         >
           <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginTop: 8 }}>
           Edit Profile
-        </Text>
+        </Text> */}
 
         <ScrollView style={{ marginTop: 12 }}>
           <View>
@@ -171,7 +171,7 @@ const EditProfile = ({ navigation }) => {
         />
       </View>
       </View>
-    </SafeAreaView>
+    // </SafeAreaView>
   );
 };
 

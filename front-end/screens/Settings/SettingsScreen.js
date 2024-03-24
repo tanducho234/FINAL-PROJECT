@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -110,9 +110,9 @@ const Settings = ({ navigation,route }) => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <View style={{ marginHorizontal: 12 }}>
-        <TouchableOpacity
+    // <SafeAreaView style={{ flex: 1, backgroundColor: "red" }}>
+      <View style={{ marginHorizontal: 24,marginVertical:5}}>
+        {/* <Pressable
           onPress={() => navigation.goBack()}
           style={{
             position: "absolute",
@@ -122,12 +122,13 @@ const Settings = ({ navigation,route }) => {
           }}
         >
           <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
-        </TouchableOpacity>
+        </Pressable>
+          
         <Text style={{ fontSize: 20, fontWeight: "bold", textAlign: "center", marginTop: 8 }}>
           Settings
-        </Text>
+        </Text> */}
 
-        <ScrollView style={{ marginTop: 12 }}>
+        <ScrollView>
           <View>
             <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>Account</Text>
             {accountItems.map((item, index) => (
@@ -165,7 +166,7 @@ const Settings = ({ navigation,route }) => {
           </View>
         </ScrollView>
       </View>
-    </SafeAreaView>
+    // </SafeAreaView>
   );
 };
 
