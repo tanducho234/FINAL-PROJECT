@@ -96,7 +96,7 @@ class UserController {
       const token = jwt.sign(
         { id: user._id, username: user.username },
         secretKey,
-        { expiresIn: "1h" }
+        { expiresIn: "7d" }
       );
       res.json({ token });
     } catch (err) {
@@ -125,7 +125,7 @@ class UserController {
   async profile(req, res) {
     try {
         const userName = req.user.username
-        console.log('ABCDE',req.user);
+        console.log('async profile(req, res)',req.user);
         const userInfor= await userRepository.getUserByUsername(userName)
         // console.log(userInfor);
         res.status(200).json(userInfor);
@@ -138,8 +138,8 @@ class UserController {
 async updateProfile(req, res) {
   const userName = req.user.username
   console.log('ABCDE',req.user);
-  const { firstname, lastname, bio, address } = req.body; // Assuming these are the fields to be updated
-  console.log('firstname', firstname);
+  const { firstname, lastname, bio, address,imagePath } = req.body; // Assuming these are the fields to be updated
+  console.log('imagePath', imagePath);
   try {
     const user= await userRepository.getUserByUsername(userName)
     if (!user) {
@@ -149,8 +149,7 @@ async updateProfile(req, res) {
     if (address) user.address = address;
     if (firstname) user.firstName = firstname;
     if (lastname) user.lastName = lastname;
-  
-
+    if (imagePath) user.imagePath = imagePath;
     // Save the updated user object
     await user.save();
     // Return the updated user object

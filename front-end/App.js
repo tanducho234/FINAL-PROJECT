@@ -16,10 +16,14 @@ import LandingScreen from './screens/LandingScreen';
 import SettingsScreen from './screens/Settings/SettingsScreen';
 import EditProfileScreen from './screens/Settings/EditProfileScreen';
 import AddBookScreen from './screens/MyBooks/AddBookScreen';
+import EditBookScreen from './screens/MyBooks/EditBookScreen';
+import NotificationsScreen from './screens/NotificationsScreen';
+
 // import { MaterialIcons } from '@expo/vector-icons';
 
 import { LogBox } from 'react-native';
 import MyBooksScreen from './screens/MyBooks/MyBookScreen';
+import HomeScreen from './screens/HomeScreen';
 
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state',
@@ -76,10 +80,6 @@ function MyBook({ route }) {
   // const { handleLogoutSuccess } = route.params;
 
   return (
-    // <Stack.Navigator>
-    //   <Stack.Screen name="BookList" options={{ headerShown: false }} component={MyBooksScreen} />
-    //   <Stack.Screen name="AddBook" component={AddBookScreen} options={{ headerShown: false }} />
-    // </Stack.Navigator>
     <Stack.Navigator>
       <Stack.Screen name="MyBooks"
         options={{
@@ -99,23 +99,19 @@ function MyBook({ route }) {
         },
       }}
       component={AddBookScreen} />
+       <Stack.Screen name="EditBook" 
+      options={{
+        headerTitle: 'Edit Book ',
+        headerShown: true, headerTitleStyle: {
+          fontSize: 20,
+          fontWeight: 'bold', // Change the font size to 30
+        },
+      }}
+      component={EditBookScreen} />
     </Stack.Navigator>
   );
 }
 
-function AuthNavigator() {
-  return (
-    <Stack.Navigator initialRouteName="Landing">
-      <Stack.Screen name="Landing" component={LandingScreen} options={{ headerShown: false, title: ' ' }}
-      />
-      <Stack.Group screenOptions={{ presentation: 'modal' }}>
-        <Stack.Screen name="Login" component={LoginScreen} handleLoginSuccess={handleLoginSuccess} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-      </Stack.Group>
-
-    </Stack.Navigator>
-  );
-}
 
 
 const App = () => {
@@ -160,15 +156,17 @@ const App = () => {
       {isLoading ? <LoadingScreen /> : (
         isAuthenticated ?
           <Tab.Navigator
-            initialRouteName="MyBook"
+            initialRouteName="Home"
             screenOptions={{
               tabBarActiveTintColor: '#e91e63',
+
             }}
           >
             <Tab.Screen
-              name="FeedTab"
-              component={Feed}
+              name="Home"
+              component={HomeScreen}
               options={{
+                headerShown:true,
                 tabBarLabel: 'Home',
                 tabBarIcon: ({ color, size }) => (
                   <MaterialCommunityIcons name="home" color={color} size={size} />
@@ -188,7 +186,7 @@ const App = () => {
             />
             <Tab.Screen
               name="NotificationsTab"
-              component={Notifications}
+              component={NotificationsScreen}
               options={{
                 tabBarLabel: 'Updates',
                 tabBarIcon: ({ color, size }) => (

@@ -2,12 +2,13 @@
 const bookRepository = require("../repositories/bookRepository");
 // repositories/BookRepository.js
 const Book = require("../models/book");
-const { upload, bucket } = require('../../config/firebase');
+const { upload, bucket, getCachedViewLink } = require('../../config/firebase');
+
 
 class BookController {
     async createBook(req, res) {
         console.log("UPLOAD file", req.file)
-      
+
         ///////
         try {
             const { title, author, genres, ISBN, desc } = req.body;
@@ -43,10 +44,11 @@ class BookController {
                     ISBN,
                     ownerId,
                     imagePath,
+                    desc
                 }
             );
             console.log('asdasdasda')
-            res.status(201).json(book);
+            res.status(201).json({ message: "Book added successfully." });
         } catch (err) {
             console.log(err)
             res.status(500).json({ error: "Unable to create the book" });
@@ -59,23 +61,56 @@ class BookController {
             const books = await bookRepository.getAllBooksByOwnerId(req.user.id);
             res.json(books);
         } catch (err) {
+            res.status(500).json({ message: "Unable to fetch books" });
+        }
+    }
+
+    async getAllBooks(req, res) {
+        try {
+            const currentUserId = req.user.id
+            console.log('getAllBooks', currentUserId)
+            const books = await bookRepository.getAllBooks();
+
+            // Map over each book and generate view links for image paths
+            const booksWithViewLinks = await Promise.all(books.map(async book => {
+                const bookViewLink = await getCachedViewLink(book.imagePath); // Generate view link for book image
+                const ownerViewLink = await getCachedViewLink(book.ownerId.imagePath); // Generate view link for owner image
+                return {
+                    ...book.toObject(), // Convert Mongoose document to plain JavaScript object
+                    viewLink: bookViewLink,
+                    ownerId: {
+                        _id: book.ownerId._id,
+                        firstName: book.ownerId.firstName,
+                        lastName: book.ownerId.lastName,
+                        viewLink: ownerViewLink
+                    }
+                };
+            }));
+            const booksWithoutCurrentUser = booksWithViewLinks.filter(book => book.ownerId._id != currentUserId);
+            // console.log("Number of books:", booksWithoutCurrentUser.length); // Log the number of books
+
+            res.json(booksWithoutCurrentUser);
+        } catch (err) {
             res.status(500).json({ error: "Unable to fetch books" });
         }
     }
+
 
     async getBookById(req, res) {
         try {
             const book = await bookRepository.getBookById(req.params.id);
             if (!book) {
-                return res.status(404).json({ error: "Book not found" });
+                return res.status(404).json({ message: "Book not found" });
             }
             res.json(book);
         } catch (err) {
-            res.status(500).json({ error: "Unable to fetch the book" });
+            res.status(500).json({ message: "Unable to fetch the book" });
         }
     }
 
     async updateBook(req, res) {
+        console.log('updateBook', req.body.title)
+
         try {
             const book = await bookRepository.updateBook(
                 req.params.id,

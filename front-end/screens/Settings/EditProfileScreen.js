@@ -1,9 +1,11 @@
-import React, { useState,useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity,Button, ScrollView,Alert,StyleSheet,Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, StyleSheet, Pressable, Image, ActivityIndicator } from 'react-native';
+import { Button ,Input} from "@rneui/base";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
 
 const EditProfile = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
@@ -12,30 +14,50 @@ const EditProfile = ({ navigation }) => {
   const [bio, setBio] = useState('');
   const [email, setEmail] = useState('');
   const [buttonStatus, setButtonStatus] = useState(false);
+  const [image, setImage] = useState(null);
+  const [imagePath, setImagePath] = useState(null);
+  const [newImagePath, setNewImagePath] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [isImageChange, setIsImageChange] = useState(false);
+
+
+
   useEffect(() => {
     // Function to fetch user data
     const fetchUserData = async () => {
       console.log("fetchUserData")
       const token = await AsyncStorage.getItem('token');
-    axios.get(`http://localhost:3000/users/profile`, {
+      await axios.get(`http://localhost:3000/users/profile`, {
         headers: {
-            Authorization: `Bearer ${token}`,
-          },
-    })
-      .then(async res =>   {
-        console.log('fetchUserData thanh cong')
-        console.log(res.data);
-        setEmail(res.data.email)
-        setAddress(res.data.address)
-        setFirstName(res.data.firstName)
-        setLastName(res.data.lastName)
-        setBio(res.data.bio)
-      } )
-      .catch(error => Alert.alert(
-        'fetchUserData fail ',
-        error.response.data.message,
-        [{ text: 'OK', onPress: () => console.log('OK pressed') }]
-      ));
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then(async res => {
+          console.log('fetchUserData thanh cong')
+          console.log(res.data);
+          setEmail(res.data.email)
+          setAddress(res.data.address)
+          setFirstName(res.data.firstName)
+          setLastName(res.data.lastName)
+          setBio(res.data.bio)
+          setImagePath(res.data.imagePath)
+          console.log('imagePathLoad', res.data.imagePath)
+          console.log('imageLoad', res.data.image)
+
+          if (res.data.imagePath != null) {
+            console.log('getlinkanh')
+            const response = await axios.get(`http://localhost:3000/image/getviewlink/${res.data.imagePath}`);
+            setImage(response.data.viewLink); // Assuming the response contains the image link
+
+          }
+
+        })
+        .catch(error => Alert.alert(
+          'fetchUserData fail ',
+          error.response.data.message,
+          [{ text: 'OK', onPress: () => console.log('OK pressed') }]
+        ));
     };
 
     // Call the function to fetch user data
@@ -43,170 +65,240 @@ const EditProfile = ({ navigation }) => {
   }, []);
 
 
-  const handleSaveProfile = async () => {
-    // Add your logic to save the profile changes
-    // This could involve making an API call to update the user's profile
-    // For simplicity, we'll just log the changes for now
-    console.log('Saving profile changes:');
-    console.log('First Name:', firstName);
-    console.log('Last Name:', lastName);
-    console.log('Address:', address);
-    console.log('Bio:', bio);
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-    const token = await AsyncStorage.getItem('token');
-    axios.post(
-      `http://localhost:3000/users/profile`,
-      {
-        firstname: firstName,
-        lastname: lastName,
-        address: address,
-        bio: bio,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      }
-    )
-    .then(res => Alert.alert(
-      'Success!',
-      res.data.message,
-      [{ text: 'Ok', onPress: () => navigation.goBack() }]
-    ))
-      .catch(error => Alert.alert(
-        'fetchUserData fail ',
-        error.response.data.message,
-        [{ text: 'OK', onPress: () => console.log('OK pressed') }]
-      ));
-
-    // You can then navigate back to the profile view or perform any other action as needed
+    if (!result.canceled) {
+      console.log("Image taken successfully", result.assets[0].uri);
+      setImage(result.assets[0].uri);
+      setButtonStatus(true);
+      setIsImageChange(true);
+    }
   };
 
-  return (
-    //  <SafeAreaView style={{ flex: 1, backgroundColor: 'red', alignItems: 'stretch' ,paddingTop:-10}}>
-      <View style={{ marginHorizontal: 30}}>
-      {/* <Pressable
-          onPress={() => navigation.goBack()}
-          style={{
-            position: "absolute",
-            left: 0,
-            paddingHorizontal: 12,
-            paddingVertical: 8,
-          }}
-        >
-          <MaterialIcons name="keyboard-arrow-left" size={24} color="black" />
-        </Pressable>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginTop: 8 }}>
-          Edit Profile
-        </Text> */}
+  const takePhoto = async () => {
+    await ImagePicker.requestCameraPermissionsAsync();
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-        <ScrollView style={{ marginTop: 12 }}>
-          <View>
-            <Text style={{ marginBottom: 5 }}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              editable={false}
-              color='gray'
-            />
-            <Text style={{ marginBottom: 5 }}>First Name</Text>
-            <TextInput
-              style={styles.input}
-              value={firstName}
-              onChangeText={ (text)=>{
-                setFirstName(text);
-                // console.log(firstName)
-                setButtonStatus(true);
-              }}      
-              
-              />
-            <Text style={{ marginBottom: 5 }}>Last Name</Text>
-            <TextInput
-              style={styles.input}
-              value={lastName}
-              onChangeText={ (text)=>{
-                setLastName(text)
-                setButtonStatus(true);
-              }}            />
-            <Text style={{ marginBottom: 5 }}>Address</Text>
-            <TextInput
-              style={styles.input}
-              value={address}
-              onChangeText={ (text)=>{
-                setAddress(text)
-                setButtonStatus(true);
-              }}            />
-            <Text style={{ marginBottom: 5 }}>Bio</Text>
-            <TextInput
-              style={[styles.input, { height: 80 }]} // Additional height for multiline input
-              multiline
-              numberOfLines={4}
-              value={bio}
-              onChangeText={ (text)=>{
-                setBio(text)
-                setButtonStatus(true);
-              }}
-            />
-          </View>
-        </ScrollView>
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      setButtonStatus(true);
+      setIsImageChange(true);
 
-        {/* <TouchableOpacity
-          style={{ backgroundColor: 'blue', padding: 10, borderRadius: 5, marginTop: 10 }}
-          onPress={handleSaveProfile}
-          disabled= {buttonStatus} // Disable the button if the form is not valid
-          
-        >
-          <Text style={styles.button
+    }
+  };
+
+
+
+  const showUploadOption = () =>
+    Alert.alert('Upload a image', 'Choose your option:', [
+      {
+        text: 'Open Gallery',
+        onPress: () => pickImage(),
+      },
+      {
+        text: 'Cancel',
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      { text: 'Take a picture', onPress: () => takePhoto() },
+    ]);
+
+    const updateImagePath = async (path) => {
+      setNewImagePath(path);
+      console.log('aaaaa',path,'',newImagePath)
+    };
+    
+    const handleSaveProfile = async () => {
+      try {
+        setLoading(true); // Start loading animation
+        const token = await AsyncStorage.getItem('token');
+        const formData = new FormData();
+        let imagePath = null; // Initialize imagePath
+    
+        if (isImageChange) {
+          formData.append('image', {
+            uri: image,
+            type: 'image/jpeg',
+            name: 'image.jpg',
+          });
+    
+          // Upload image and retrieve imagePath
+          const response = await axios.post('http://localhost:3000/image/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            }
+          });
+          imagePath = response.data.imagePath;
         }
-        disabled= {buttonStatus}
-        >Save Profile</Text>
-        </TouchableOpacity> */}
-        <View style={[styles.button,{alignItems:'center'}]}
-        backgroundColor={buttonStatus ? 'green' : 'gray'}>
-        <Button
-          disabled= {!buttonStatus} // Disable the button if the form is not valid
-          title="Save"
-          color="white"
-          onPress={handleSaveProfile}
-        />
-      </View>
-      </View>
+    
+        axios.post(
+          `http://localhost:3000/users/profile`,
+          {
+            firstname: firstName,
+            lastname: lastName,
+            address: address,
+            bio: bio,
+            imagePath: imagePath, // Include imagePath in the request payload
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
+          }
+        )
+        .then(res => Alert.alert(
+          'Success!',
+          res.data.message,
+          [{ text: 'Ok', onPress: () => navigation.goBack() }]
+        ))
+        .catch(error => Alert.alert(
+          'fetchUserData fail ',
+          error.response.data.message,
+          [{ text: 'OK', onPress: () => console.log('OK pressed') }]
+        ));
+      } catch (error) {
+        console.error("Error edit userprofile", error);
+      } finally {
+        setLoading(false); // Stop loading animation
+      }
+    };
+    
+
+
+  return (
+    <View style={styles.container}>
+      
+      <TouchableOpacity style={{ alignItems: 'center', }}
+            onPress={showUploadOption}
+          >
+            {image && <Image source={{ uri: image }} style={styles.image} />}
+            {image == null && <Image source={require('../../image/gray-profile.png')} style={styles.image} />}
+          </TouchableOpacity>
+      <ScrollView style={{ marginTop: 12 ,backgroundColor:'white'}}>
+        <View>
+         
+          <Input
+  placeholder='Enter email'
+  inputContainerStyle={styles.input}
+  value={email}
+  disabled
+  errorMessage="Email cannot be edited"
+  label="Email"
+  labelStyle={{ marginBottom: 5 }}
+  leftIcon={<Icon name="email" size={20} />}
+/>
+<Input
+  placeholder='Enter first name'
+  inputContainerStyle={styles.input}
+  value={firstName}
+  onChangeText={(text) => {
+    setFirstName(text);
+    setButtonStatus(true);
+  }}
+  label="First Name"
+  labelStyle={{ marginBottom: 5 }}
+  leftIcon={<Icon name="account-outline" size={20} />}
+/>
+<Input
+  placeholder='Enter last name'
+  inputContainerStyle={styles.input}
+  value={lastName}
+  onChangeText={(text) => {
+    setLastName(text);
+    setButtonStatus(true);
+  }}
+  label="Last Name"
+  labelStyle={{ marginBottom: 5 }}
+  leftIcon={<Icon name="account-outline" size={20} />}
+/>
+<Input
+  placeholder='Enter address'
+  inputContainerStyle={styles.input}
+  value={address}
+  onChangeText={(text) => {
+    setAddress(text);
+    setButtonStatus(true);
+  }}
+  label="Address"
+  labelStyle={{ marginBottom: 5 }}
+  leftIcon={<Icon name="directions" size={20} />}
+/>
+<Input
+  placeholder='Enter bio'
+  inputContainerStyle={[styles.input, { height: 80 }]} // Additional height for multiline input
+  multiline
+  numberOfLines={4}
+  value={bio}
+  onChangeText={(text) => {
+    setBio(text);
+    setButtonStatus(true);
+  }}
+  label="Bio"
+  labelStyle={{ marginBottom: 5 }}
+  leftIcon={<Icon name="human" size={20} />}
+/>
+        </View>
+      </ScrollView>
+
+      <Button
+        buttonStyle={{  backgroundColor: "green", padding: 10}}
+        containerStyle={{ borderRadius: 50, backgroundColor: "green",width:"50%",alignSelf:'center' }}
+        disabledTitleStyle={{ color: "gray" }}
+        icon={<Icon name="content-save" size={15} color="white" />}
+        iconRight
+        disabled={!buttonStatus}
+        loading={loading}
+        loadingProps={{ animating: true }}
+        loadingStyle={{}}
+        onPress={handleSaveProfile}
+        title="Save"
+        titleProps={{}}
+        titleStyle={{ marginHorizontal: 5, fontSize: 20 }}
+      />
+      
+    </View>
+    
     // </SafeAreaView>
   );
 };
 
-  const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'top',
-    alignItems: 'center',
+    alignItems: 'stretch',
     padding: 20,
     backgroundColor: 'white',
   },
-  button: {
-    marginBottom: 20,
-    borderRadius: 50,
-    width: '50%',
-    alignSelf: 'center', // To center horizontally
-  },
   input: {
-    width: '100%',
-    height: 40,
-    borderColor: 'gray',
+    width: '95%',
+    alignSelf: 'center',
+    borderColor: 'green',
     borderWidth: 2,
     borderRadius: 10,
-    marginBottom: 10,
     paddingHorizontal: 10,
   },
   registerText: {
     marginTop: 20,
-    color: 'blue',
   },
   image: {
-    width: 140,
-    height: 140,
-    marginBottom: 20,
-  },
+    width: 100,
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 90
+  }
+
 });
 
 export default EditProfile;

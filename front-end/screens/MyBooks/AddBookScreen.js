@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Alert, FlatList, View, Text, TextInput, ActivityIndicator, TouchableOpacity, StyleSheet, Button, Image, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Alert, FlatList, View, Text, TextInput, ActivityIndicator, TouchableOpacity, StyleSheet, Image, Pressable } from "react-native";
+
+
+import { Button } from "@rneui/base";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import Checkbox from 'expo-checkbox';
 import axios from 'axios'; // Assuming you'll make API requests to add a book
@@ -17,10 +19,10 @@ const AddBookScreen = ({ navigation }) => {
   const [ISBN, setISBN] = useState('');
   const [image, setImage] = useState(null);
   const [desc, setDesc] = useState(null);
-  const [genres, setGenres] = useState([]);
+  const [genresList, setGenresList] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState([]);
-  const disabledButton = !title || !author || genres==[] || !ISBN || !image;
+  const disabledButton = !title || !author || genresList==[] || !ISBN || !image;
 
   useEffect(() => {
     // Function to fetch user data
@@ -28,7 +30,7 @@ const AddBookScreen = ({ navigation }) => {
       const token = await AsyncStorage.getItem('token');
       axios.get(`http://localhost:3000/genres`)
         .then(async res => {
-          setGenres(res.data.sort((a, b) => a.name.localeCompare(b.name)))
+          setGenresList(res.data.sort((a, b) => a.name.localeCompare(b.name)))
           // console.log(res.data[0])
         })
         .catch(error => Alert.alert(
@@ -45,11 +47,11 @@ const AddBookScreen = ({ navigation }) => {
     const index = selectedGenres.indexOf(genreId);
     if (index > -1) {
       setSelectedGenres(selectedGenres.filter((_id) => _id !== genreId));
-      console.log(selectedGenres);
+      // console.log(selectedGenres);
 
     } else {
       setSelectedGenres([...selectedGenres, genreId]);
-      console.log(selectedGenres);
+      // console.log(selectedGenres);
 
     }
   };
@@ -84,11 +86,16 @@ const AddBookScreen = ({ navigation }) => {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`,
         }
-      });
-      alert('Image uploaded successfully');
-      console.log("Book added successfully");
-      // Optionally, navigate back to a different screen after adding book
-      // navigation.navigate("SomeOtherScreen");
+      }).then(res => Alert.alert(
+        'Success!',
+        res.data.message,
+        [{ text: 'Ok', onPress: () => navigation.goBack() }]
+      ))
+        .catch(error => Alert.alert(
+          'fetchUserData fail ',
+          error.response.data.message,
+          [{ text: 'OK', onPress: () => console.log('OK pressed') }]
+        ));
     } catch (error) {
       console.error("Error adding book", error);
     } finally {
@@ -152,9 +159,6 @@ const AddBookScreen = ({ navigation }) => {
             </View>
           </TouchableOpacity>
 
-          {/* <Button title="Pick an image from camera roll" onPress={pickImage} />
-  <Button title="Take a photo" onPress={takePhoto} /> */}
-          {/* <Button title="Upload Image" onPress={uploadImage} /> */}
         </View>
         <View style={{ marginHorizontal: 20 }}>
           <Text style={{ marginBottom: 5 }}>Title</Text>
@@ -209,7 +213,7 @@ const AddBookScreen = ({ navigation }) => {
 
                 Hello World!</Text>
               <FlatList
-                data={genres}
+                data={genresList}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => (
                   <TouchableOpacity onPress={() => toggleGenre(item._id)}>
@@ -231,23 +235,23 @@ const AddBookScreen = ({ navigation }) => {
             </View>
           </View>
         </Modal>
-        {loading ? (
-          <ActivityIndicator style={{ marginTop: 5 }} size="large" color="#0000ff" />
-        ) : (
-          <View style={[styles.button, { alignItems: 'center' }]}
-            backgroundColor={!disabledButton ? 'green' : 'gray'}>
-            <Button
-              disabled={disabledButton} // Disable the button if the form is not valid
-              title="Upload"
-              color="white"
-              onPress={addBook}
-            />
-          </View>
-
-        )}
+        <Button
+        buttonStyle={{  backgroundColor: "green", padding: 10}}
+        containerStyle={{ borderRadius: 50, backgroundColor: "green",width:"50%",alignSelf:'center' }}
+        disabledTitleStyle={{ color: "gray" }}
+        icon={<Icon name="plus" size={15} color="white" />}
+        iconRight
+        disabled={disabledButton}
+        loading={loading}
+        loadingProps={{ animating: true }}
+        loadingStyle={{}}
+        onPress={addBook}
+        title="Add"
+        titleProps={{}}
+        titleStyle={{ marginHorizontal: 5, fontSize: 20 }}
+      />
       </View>
 
-    // </SafeAreaView>
   );
 };
 

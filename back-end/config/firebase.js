@@ -20,5 +20,46 @@ const bucket = admin.storage().bucket();
 // Set up Multer for file uploads
 const storage= multer.memoryStorage();
 const upload = multer({ storage: storage });
-module.exports = {upload,bucket}
+
+
+const urlCache = {}; // Simple cache object
+
+async function getCachedViewLink(imagePath) {
+    const now = Date.now();
+    if (urlCache[imagePath] && urlCache[imagePath].expires > now) {
+        console.log('cache')
+        return urlCache[imagePath].url;
+    } else {
+        try {
+            const signedUrl = await getViewLink(imagePath);
+            urlCache[imagePath] = {
+                url: signedUrl,
+                expires: now + 60 * 60 * 1000 // Cache expiry time (1 hour)
+            };
+            return signedUrl;
+        } catch (error) {
+            console.error('Error getting cached view link:', error);
+            throw error;
+        }
+    }
+}
+
+async function getViewLink(imagePath) {
+    try {
+        const bucket = admin.storage().bucket();
+        const file = bucket.file(imagePath);
+        // Get a signed URL for the file with a maximum validity of 1 hour
+        const signedUrl = await file.getSignedUrl({
+            action: 'read',
+            expires: Date.now() + 60 * 60 * 1000 // Link expiration time (1 hour)
+        });
+        return signedUrl[0];
+    } catch (error) {
+        console.error('Error getting view link:', error);
+        throw error;
+    }
+}
+
+
+module.exports = {upload,bucket,admin,getCachedViewLink}
 

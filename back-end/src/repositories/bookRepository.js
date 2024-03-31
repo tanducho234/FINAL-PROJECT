@@ -6,6 +6,9 @@ class BookRepository {
     return await Book.create(data);
   }
 
+  async getAllBooks() {
+    return await Book.find().populate('ownerId').populate('genres');
+  }
   async getAllBooksByOwnerId(userId) {
     return await Book.find({ ownerId: userId });
   }

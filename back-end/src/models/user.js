@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
   lastName: String,             
   dob: Date,                     
   address: String, 
-  profilePicture: String,
+  imagePath: String,
   bio: String,
   registrationDate: { type: Date, default: Date.now },
   role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', required: true },
