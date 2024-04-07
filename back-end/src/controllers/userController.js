@@ -159,7 +159,22 @@ async updateProfile(req, res) {
     res.status(500).json({ error: 'Unable to update profile' });
   }
 }
-
+//get account balance
+async getAccountBalance(req, res) {
+  const userName = req.user.username
+  console.log('getAccountBalance', req.user);
+  try {
+    const user= await userRepository.getUserByUsername(userName)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Return the account balance
+    res.json({ message: 'Account balance', accountBalance: user.accountBalance ,userId :user._id});
+  } catch (error) {
+    console.error('Error getting account balance:', error);
+    res.status(500).json({ error: 'Unable to get account balance' });
+  }
+}
 
 }
 module.exports = new UserController();

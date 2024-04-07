@@ -174,6 +174,7 @@ const HomeScreen = ({ navigation }) => {
                         <View style={styles.bookContainer}>
                             <View>
                             <Image source={{ uri: book.viewLink }} style={styles.bookImage} />
+                           <View style={{display:'flex',flexDirection: 'row'}}>
                             <Avatar
                                 activeOpacity={0.2}
                                 avatarStyle={{}}
@@ -183,10 +184,13 @@ const HomeScreen = ({ navigation }) => {
                                 imageProps={{}}
                                 placeholderStyle={{}}
                                 rounded
-                                size="small"
+                                size={25}
                                 source={{ uri: book.ownerId.viewLink }}
                                 titleStyle={{}}
                             />
+                             {/* <Text style={{alignSelf:'center'}}>{book.onwerId.firstName}</Text> */}
+
+                            </View>
                             </View>
                             <View style={styles.textContainer}>
                                 <Text style={styles.bookTitle}>{book.title}</Text>

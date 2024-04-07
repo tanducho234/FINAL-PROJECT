@@ -133,3 +133,4 @@ dist
 .DS_Store
 back-end/.DS_Store
 back-end/.DS_Store
+back-end/config/default.json

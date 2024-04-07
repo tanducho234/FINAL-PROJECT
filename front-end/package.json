@@ -1,5 +1,5 @@
 {
-  "name": "awesomeproject",
+  "name": "finalyearproject",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
@@ -27,7 +27,8 @@
     "react-native": "0.72.4",
     "react-native-image-picker": "^7.1.2",
     "react-native-ios-picker": "^1.0.0",
-    "react-native-modal": "^13.0.1"
+    "react-native-modal": "^13.0.1",
+    "expo-web-browser": "~12.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

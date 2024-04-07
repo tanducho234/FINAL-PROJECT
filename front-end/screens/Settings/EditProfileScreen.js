@@ -54,7 +54,7 @@ const EditProfile = ({ navigation }) => {
 
         })
         .catch(error => Alert.alert(
-          'fetchUserData fail ',
+          'fetchUserData fail 1',
           error.response.data.message,
           [{ text: 'OK', onPress: () => console.log('OK pressed') }]
         ));
@@ -162,7 +162,7 @@ const EditProfile = ({ navigation }) => {
           [{ text: 'Ok', onPress: () => navigation.goBack() }]
         ))
         .catch(error => Alert.alert(
-          'fetchUserData fail ',
+          'fetchUserData fail 2',
           error.response.data.message,
           [{ text: 'OK', onPress: () => console.log('OK pressed') }]
         ));

@@ -24,8 +24,8 @@ const Settings = ({ navigation,route }) => {
     console.log("Privacy function");
   };
 
-  const navigateToSubscription = () => {
-    console.log("Subscription function");
+  const navigateToAccountBalance = () => {
+    navigation.navigate("AccountBalance");
   };
 
   const navigateToSupport = () => {
@@ -63,10 +63,11 @@ const Settings = ({ navigation,route }) => {
     { icon: "security", text: "Security", action: navigateToSecurity },
     { icon: "notifications-none", text: "Notifications", action: navigateToNotifications },
     { icon: "lock-outline", text: "Privacy", action: navigateToPrivacy },
+    { icon: "credit-card", text: "Account Balance", action: navigateToAccountBalance },
   ];
 
   const supportItems = [
-    { icon: "credit-card", text: "My Subscription", action: navigateToSubscription },
+    { icon: "credit-card", text: "My Subscription", action: navigateToAccountBalance },
     { icon: "help-outline", text: "Help & Support", action: navigateToSupport },
     { icon: "info-outline", text: "Terms and Policies", action: navigateToTermsAndPolicies },
   ];

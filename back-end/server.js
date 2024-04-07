@@ -19,10 +19,13 @@ const genreRoutes = require("./src/routes/genreRoutes");
 const registerRoutes = require("./src/routes/registerRoutes");
 const imageRoutes = require("./src/routes/imageRoutes");
 const borrowRequestRoutes = require("./src/routes/borrowRequestRoutes");
+const paymentRoutes = require("./src/routes/paymentRoutes");
 
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
+process.env.TZ = 'Asia/Ho_Chi_Minh';
+
 const MONGODB_URI = process.env.MONGODB_URI;
 
 // Middleware
@@ -45,8 +48,8 @@ app.use("/borrow",authMiddleware, borrowRequestRoutes);
 app.use("/genres", genreRoutes);
 app.use("/image",imageRoutes);
 
-
-app.get("/", (req, res) => {
+app.use('/',paymentRoutes)
+app.get("/thanhtoanthanhcong", (req, res) => {
   res.json({msg: 'welcome'});
 });
 // const admin = require('firebase-admin');

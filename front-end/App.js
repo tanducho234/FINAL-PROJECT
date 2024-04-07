@@ -15,6 +15,7 @@ import RegisterScreen from './screens/RegisterScreen';
 import LandingScreen from './screens/LandingScreen';
 import SettingsScreen from './screens/Settings/SettingsScreen';
 import EditProfileScreen from './screens/Settings/EditProfileScreen';
+import AccountBalanceScreen from './screens/Settings/AccountBalanceScreen';
 import AddBookScreen from './screens/MyBooks/AddBookScreen';
 import EditBookScreen from './screens/MyBooks/EditBookScreen';
 import NotificationsScreen from './screens/NotificationsScreen';
@@ -67,6 +68,15 @@ function Settings({ route }) {
       component={EditProfileScreen} 
       options={{
         headerTitle: 'Edit Profile',
+        headerShown: true, headerTitleStyle: {
+          fontSize: 20,
+          fontWeight: 'bold', // Change the font size to 30
+        },
+      }}/>
+      <Stack.Screen name="AccountBalance"
+      component={AccountBalanceScreen}
+      options={{
+        headerTitle: 'Account Balance',
         headerShown: true, headerTitleStyle: {
           fontSize: 20,
           fontWeight: 'bold', // Change the font size to 30
