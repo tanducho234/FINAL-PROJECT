@@ -6,7 +6,6 @@ const app = express();
 // import multer from "multer";
 // import config from "config/.config"
 
-
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
@@ -14,7 +13,7 @@ const dotenv = require("dotenv");
 const connectToDatabase = require("./config/database");
 const userRoutes = require("./src/routes/userRoutes");
 const bookRoutes = require("./src/routes/bookRoutes");
-const loginRoutes=require("./src/routes/loginRoutes");
+const loginRoutes = require("./src/routes/loginRoutes");
 const genreRoutes = require("./src/routes/genreRoutes");
 const registerRoutes = require("./src/routes/registerRoutes");
 const imageRoutes = require("./src/routes/imageRoutes");
@@ -25,14 +24,13 @@ const transactionRoute = require("./src/routes/transactionRoute");
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-process.env.TZ = 'Asia/Ho_Chi_Minh';
+process.env.TZ = "Asia/Ho_Chi_Minh";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
 // Middleware
 app.use(express.json());
 const authMiddleware = require("./src/middlewares/authMiddleware");
-
 
 // Connect to MongoDB
 connectToDatabase();
@@ -42,18 +40,17 @@ connectToDatabase();
 app.use("/register", registerRoutes);
 app.use("/login", loginRoutes);
 
-app.use("/users",authMiddleware, userRoutes);
-app.use("/books",authMiddleware, bookRoutes);
-app.use("/borrow",authMiddleware, borrowRequestRoutes);
-app.use('/transactions',authMiddleware, transactionRoute);
-
+app.use("/users", authMiddleware, userRoutes);
+app.use("/books", authMiddleware, bookRoutes);
+app.use("/borrow", authMiddleware, borrowRequestRoutes);
+app.use("/transactions", authMiddleware, transactionRoute);
 
 app.use("/genres", genreRoutes);
-app.use("/image",imageRoutes);
+app.use("/image", imageRoutes);
 
-app.use('/',paymentRoutes)
+app.use("/", paymentRoutes);
 app.get("/thanhtoanthanhcong", (req, res) => {
-  res.json({msg: 'welcome'});
+  res.json({ msg: "welcome" });
 });
 // const admin = require('firebase-admin');
 // async function getViewLink(imagePath) {

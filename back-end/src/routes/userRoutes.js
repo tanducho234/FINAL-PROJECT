@@ -8,6 +8,8 @@ router.post("/profile", userController.updateProfile);
 //get account balance
 router.get("/balance", userController.getAccountBalance);
 router.post("/update-balance", userController.updateAccountBalance);
-    
+
+//add bookid to favouriteBooks
+router.post("/add-to-favourite", userController.addToFavourite);
 
 module.exports = router;

@@ -1,10 +1,10 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const transactionController = require('../controllers/transactionController');
+const transactionController = require("../controllers/transactionController");
 
-router.post('/', transactionController.createTransaction);
+router.post("/", transactionController.createTransaction);
 // router.get('/', transactionController.getAllTransactions);
-router.get('/', transactionController.getTransactionById);
+router.get("/", transactionController.getTransactionById);
 
 // Add other routes as needed
 

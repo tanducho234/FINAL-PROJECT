@@ -9,7 +9,7 @@ class UserRepository {
   async getUserByUsername(username) {
     return await User.findOne({ username });
   }
-async getUserById(id) {
+  async getUserById(id) {
     return await User.findById(id);
   }
   async getUserByEmail(email) {
@@ -27,6 +27,22 @@ async getUserById(id) {
       if (!user) {
         throw new Error("User not found");
       }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  //add bookid to favoriteBooks
+  async addNewFavoriteBook(userId, bookId) {
+    try {
+      const user = await User.findById(userId);
+      if (user.favoriteBooks.includes(bookId)) {
+        console.log("remove it from list",bookId)
+        user.favoriteBooks.pull(bookId);
+        await user.save();
+        return;
+      }
+      user.favoriteBooks.push(bookId);
+      await user.save();
     } catch (error) {
       console.error(error);
     }
