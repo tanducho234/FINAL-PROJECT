@@ -1,21 +1,28 @@
 // LandingScreen.js
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet,Image} from 'react-native';
-import { SearchBar } from '@rneui/themed';
+import React from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+} from "react-native";
+import { SearchBar } from "@rneui/themed";
 
-
-const LandingPage = ({ navigation ,route }) => {
+const LandingPage = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.firstPart}>
-          <Image source={require('../image/pic1.png')} style={styles.image} />
+          <Image source={require("../image/pic1.png")} style={styles.image} />
           <Text style={styles.textContainer}>Welcome to My App!</Text>
 
-          
           {/* Add more content here */}
         </View>
-       <View ><SearchBar/></View> 
+        <View>
+          <SearchBar />
+        </View>
 
         <View style={styles.secondPart}>
           <Text style={styles.heading}>Welcome to My App!</Text>
@@ -26,10 +33,18 @@ const LandingPage = ({ navigation ,route }) => {
         </View>
       </ScrollView>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login',{ example: 'exampleUser' })}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() =>
+            navigation.navigate("Login", { example: "exampleUser" })
+          }
+        >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Register')}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("Register")}
+        >
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
       </View>
@@ -40,32 +55,31 @@ const LandingPage = ({ navigation ,route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   scrollContainer: {
     flexGrow: 1,
-    position: 'relative',
-
+    position: "relative",
   },
-  
+
   firstPart: {
     paddingTop: 60,
     height: 190,
-    backgroundColor: '#00b250',
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: "#00b250",
+    flexDirection: "row",
+    alignItems: "center",
     padding: 10,
   },
   textContainer: {
     flex: 1,
   },
   image: {
-    marginLeft:0,
+    marginLeft: 0,
     width: 140,
-    height:140,
+    height: 140,
   },
   searchBar: {
-    backgroundColor:"white"
+    backgroundColor: "white",
   },
   secondPart: {
     flex: 1,
@@ -76,7 +90,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
   },
   description: {
@@ -86,32 +100,29 @@ const styles = StyleSheet.create({
   buttonContainer: {
     margin: 0,
     padding: 10,
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     borderWidth: 1,
     borderRadius: 30,
-        
-
   },
   button: {
-    marginBottom:20,
-    height:50,
-    width:120,
-    backgroundColor: '#00b250',
+    marginBottom: 20,
+    height: 50,
+    width: 120,
+    backgroundColor: "#00b250",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 40,
-    justifyContent: 'center', /* centers horizontally */
-    alignItems: 'center', /* centers vertically */
-
+    justifyContent: "center" /* centers horizontally */,
+    alignItems: "center" /* centers vertically */,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
     fontSize: 20,
   },
 });

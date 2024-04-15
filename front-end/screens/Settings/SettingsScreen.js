@@ -1,12 +1,18 @@
 import React from "react";
-import { View, Text, TouchableOpacity, ScrollView, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Pressable,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
-const Settings = ({ navigation,route }) => {
-    const { handleLogoutSuccess } = route.params;
+const Settings = ({ navigation, route }) => {
+  const { handleLogoutSuccess } = route.params;
 
   const navigateToEditProfile = () => {
     navigation.navigate("EditProfile");
@@ -53,32 +59,61 @@ const Settings = ({ navigation,route }) => {
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem("token");
     // Update the state to indicate that the user is no longer authenticated
     handleLogoutSuccess();
-    console.log('Logout successful');  };
+    console.log("Logout successful");
+  };
 
   const accountItems = [
-    { icon: "person-outline", text: "Edit Profile", action: navigateToEditProfile },
+    {
+      icon: "person-outline",
+      text: "Edit Profile",
+      action: navigateToEditProfile,
+    },
     { icon: "security", text: "Security", action: navigateToSecurity },
-    { icon: "notifications-none", text: "Notifications", action: navigateToNotifications },
+    {
+      icon: "notifications-none",
+      text: "Notifications",
+      action: navigateToNotifications,
+    },
     { icon: "lock-outline", text: "Privacy", action: navigateToPrivacy },
-    { icon: "credit-card", text: "Account Balance", action: navigateToAccountBalance },
+    {
+      icon: "credit-card",
+      text: "Account Balance",
+      action: navigateToAccountBalance,
+    },
   ];
 
   const supportItems = [
-    { icon: "credit-card", text: "My Subscription", action: navigateToAccountBalance },
+    {
+      icon: "credit-card",
+      text: "My Subscription",
+      action: navigateToAccountBalance,
+    },
     { icon: "help-outline", text: "Help & Support", action: navigateToSupport },
-    { icon: "info-outline", text: "Terms and Policies", action: navigateToTermsAndPolicies },
+    {
+      icon: "info-outline",
+      text: "Terms and Policies",
+      action: navigateToTermsAndPolicies,
+    },
   ];
 
   const cacheAndCellularItems = [
-    { icon: "delete-outline", text: "Free up space", action: navigateToFreeSpace },
+    {
+      icon: "delete-outline",
+      text: "Free up space",
+      action: navigateToFreeSpace,
+    },
     { icon: "save-alt", text: "Date Saver", action: navigateToDateSaver },
   ];
 
   const actionsItems = [
-    { icon: "outlined-flag", text: "Report a problem", action: navigateToReportProblem },
+    {
+      icon: "outlined-flag",
+      text: "Report a problem",
+      action: navigateToReportProblem,
+    },
     { icon: "people-outline", text: "Add Account", action: addAccount },
     { icon: "logout", text: "Log out", action: logout },
   ];
@@ -91,7 +126,7 @@ const Settings = ({ navigation,route }) => {
         alignItems: "center",
         paddingVertical: 8,
         paddingLeft: 12,
-        backgroundColor: 'rgba(36, 39, 96, 0.05)',
+        backgroundColor: "rgba(36, 39, 96, 0.05)",
         borderRadius: 12,
         marginBottom: 8,
       }}
@@ -112,8 +147,8 @@ const Settings = ({ navigation,route }) => {
 
   return (
     // <SafeAreaView style={{ flex: 1, backgroundColor: "red" }}>
-      <View style={{ marginHorizontal: 24,marginVertical:5}}>
-        {/* <Pressable
+    <View style={{ marginHorizontal: 24, marginVertical: 5 }}>
+      {/* <Pressable
           onPress={() => navigation.goBack()}
           style={{
             position: "absolute",
@@ -129,44 +164,52 @@ const Settings = ({ navigation,route }) => {
           Settings
         </Text> */}
 
-        <ScrollView>
-          <View>
-            <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>Account</Text>
-            {accountItems.map((item, index) => (
-              <React.Fragment key={index}>
-                {renderSettingsItem(item)}
-              </React.Fragment>
-            ))}
-          </View>
+      <ScrollView>
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>
+            Account
+          </Text>
+          {accountItems.map((item, index) => (
+            <React.Fragment key={index}>
+              {renderSettingsItem(item)}
+            </React.Fragment>
+          ))}
+        </View>
 
-          <View>
-            <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>Support & About</Text>
-            {supportItems.map((item, index) => (
-              <React.Fragment key={index}>
-                {renderSettingsItem(item)}
-              </React.Fragment>
-            ))}
-          </View>
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>
+            Support & About
+          </Text>
+          {supportItems.map((item, index) => (
+            <React.Fragment key={index}>
+              {renderSettingsItem(item)}
+            </React.Fragment>
+          ))}
+        </View>
 
-          <View>
-            <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>Cache & Cellular</Text>
-            {cacheAndCellularItems.map((item, index) => (
-              <React.Fragment key={index}>
-                {renderSettingsItem(item)}
-              </React.Fragment>
-            ))}
-          </View>
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>
+            Cache & Cellular
+          </Text>
+          {cacheAndCellularItems.map((item, index) => (
+            <React.Fragment key={index}>
+              {renderSettingsItem(item)}
+            </React.Fragment>
+          ))}
+        </View>
 
-          <View>
-            <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>Actions</Text>
-            {actionsItems.map((item, index) => (
-              <React.Fragment key={index}>
-                {renderSettingsItem(item)}
-              </React.Fragment>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 8 }}>
+            Actions
+          </Text>
+          {actionsItems.map((item, index) => (
+            <React.Fragment key={index}>
+              {renderSettingsItem(item)}
+            </React.Fragment>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
     // </SafeAreaView>
   );
 };

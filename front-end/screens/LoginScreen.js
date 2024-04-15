@@ -1,43 +1,44 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, Image } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import { Input,Button } from "@rneui/base";
+import React, { useState } from "react";
+import { View, Text, TextInput, StyleSheet, Alert, Image } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { Input, Button } from "@rneui/base";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 const LoginScreen = ({ route, navigation }) => {
   const { setIsAuthenticated } = route.params;
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleLogin = async () => {
-    console.log('handle login')
-    axios.post(`http://localhost:3000/login`, {
-      username: username,
-      password: password,
-    })
-      .then(async res => {
-        setErrorMessage('')
-        console.log('login thanh cong')
-        await AsyncStorage.setItem('token', res.data.token);
-        setIsAuthenticated(true)
+    console.log("handle login");
+    axios
+      .post(`http://localhost:3000/login`, {
+        username: username,
+        password: password,
+      })
+      .then(async (res) => {
+        setErrorMessage("");
+        console.log("login thanh cong");
+        await AsyncStorage.setItem("token", res.data.token);
+        setIsAuthenticated(true);
         // navigation.navigate('Home',{ username: 'exampleUser' });
       })
-      .catch(error => 
-        setErrorMessage('Username or Password does not match')
-      //   Alert.alert(
-      //   'Login Failed',
-      //   error.response.data.message,
-      //   [{ text: 'OK', onPress: () => console.log('OK pressed') }]
-      // )
+      .catch(
+        (error) => setErrorMessage("Username or Password does not match")
+        //   Alert.alert(
+        //   'Login Failed',
+        //   error.response.data.message,
+        //   [{ text: 'OK', onPress: () => console.log('OK pressed') }]
+        // )
       );
   };
 
   return (
     <View style={styles.container}>
-      <Image source={require('../image/pic2.jpeg')} style={styles.image} />
-      <Input  
-        placeholder='Enter username'
+      <Image source={require("../image/pic2.jpeg")} style={styles.image} />
+      <Input
+        placeholder="Enter username"
         inputContainerStyle={styles.input}
         value={username}
         onChangeText={setUsername}
@@ -46,7 +47,7 @@ const LoginScreen = ({ route, navigation }) => {
         leftIcon={<Icon name="account-outline" size={20} />}
       />
       <Input
-        placeholder='Enter password'
+        placeholder="Enter password"
         inputContainerStyle={styles.input}
         value={password}
         errorMessage={errorMessage}
@@ -57,21 +58,28 @@ const LoginScreen = ({ route, navigation }) => {
         secureTextEntry={true}
       />
       <Button
-      buttonStyle={{width: 150, backgroundColor: "green",padding:10}}
-      containerStyle={{ margin: 1, borderRadius: 50 , backgroundColor: "green",}}
-      disabledTitleStyle={{ color: "#gray" }}
-      icon={<Icon name="login" size={15} color="white" />}
-      iconRight
-      disabled={false}
-      loading={false}
-      loadingProps={{ animating: true }}
-      loadingStyle={{}}
-      onPress={handleLogin}
-      title="Login"
-      titleProps={{}}
-      titleStyle={{ marginHorizontal: 5, fontSize: 20 }}
-    />
-      <Text style={styles.registerText} onPress={() => navigation.navigate('Register')}>
+        buttonStyle={{ width: 150, backgroundColor: "green", padding: 10 }}
+        containerStyle={{
+          margin: 1,
+          borderRadius: 50,
+          backgroundColor: "green",
+        }}
+        disabledTitleStyle={{ color: "#gray" }}
+        icon={<Icon name="login" size={15} color="white" />}
+        iconRight
+        disabled={false}
+        loading={false}
+        loadingProps={{ animating: true }}
+        loadingStyle={{}}
+        onPress={handleLogin}
+        title="Login"
+        titleProps={{}}
+        titleStyle={{ marginHorizontal: 5, fontSize: 20 }}
+      />
+      <Text
+        style={styles.registerText}
+        onPress={() => navigation.navigate("Register")}
+      >
         Don't have an account? Register here
       </Text>
     </View>
@@ -81,23 +89,22 @@ const LoginScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'top',
-    alignItems: 'center',
+    justifyContent: "top",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: 'white',
-
+    backgroundColor: "white",
   },
   input: {
-    width: '95%',
-    alignSelf: 'center',
-    borderColor: 'green',
+    width: "95%",
+    alignSelf: "center",
+    borderColor: "green",
     borderWidth: 2,
     borderRadius: 10,
     paddingHorizontal: 10,
   },
   registerText: {
     marginTop: 20,
-    color: 'blue',
+    color: "blue",
   },
   image: {
     width: 140,

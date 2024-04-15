@@ -1,18 +1,30 @@
 // RegisterScreen.js
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Image } from 'react-native';
-import axios from 'axios';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  Image,
+} from "react-native";
+import axios from "axios";
 
 const RegisterScreen = ({ navigation }) => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const usernameInputRef = useRef(null);
-  const [borderColor, setBorderColor] = useState('green'); // Initial border color
-  const isButtonDisabled = !username || !email || !password || !confirmPassword || confirmPassword!=password;
-  const [isConfirmPasswordMatch, setIsConfirmPasswordMatch] = useState(true);;
-
+  const [borderColor, setBorderColor] = useState("green"); // Initial border color
+  const isButtonDisabled =
+    !username ||
+    !email ||
+    !password ||
+    !confirmPassword ||
+    confirmPassword != password;
+  const [isConfirmPasswordMatch, setIsConfirmPasswordMatch] = useState(true);
 
   const handleConfirmPasswordChange = (text) => {
     setConfirmPassword(text);
@@ -21,12 +33,11 @@ const RegisterScreen = ({ navigation }) => {
     if (text !== password) {
       // If not match, set border color to red
       setIsConfirmPasswordMatch(false);
-      setBorderColor('red');
-
+      setBorderColor("red");
     } else {
       // If match, set border color back to default
       setIsConfirmPasswordMatch(true);
-      setBorderColor('green');
+      setBorderColor("green");
     }
   };
 
@@ -38,32 +49,31 @@ const RegisterScreen = ({ navigation }) => {
   }, []);
 
   const handleRegister = async () => {
+    console.log(email);
+    console.log(username);
+    console.log(password);
 
-
-    console.log(email)
-    console.log(username)
-    console.log(password)
-    
-    axios.post(`http://localhost:3000/register`, {
-      username: username,
-      email: email,
-      password: password,
-    })
-      .then(res => Alert.alert(
-        'Registration Successful ',
-        res.data.message,
-        [{ text: 'Login', onPress: () => navigation.navigate('Login') }]
-      ))
-      .catch(error => Alert.alert(
-        'Registration Failed',
-        error.response.data.message,
-        [{ text: 'OK', onPress: () => console.log('OK pressed') }]
-      ));
+    axios
+      .post(`http://localhost:3000/register`, {
+        username: username,
+        email: email,
+        password: password,
+      })
+      .then((res) =>
+        Alert.alert("Registration Successful ", res.data.message, [
+          { text: "Login", onPress: () => navigation.navigate("Login") },
+        ])
+      )
+      .catch((error) =>
+        Alert.alert("Registration Failed", error.response.data.message, [
+          { text: "OK", onPress: () => console.log("OK pressed") },
+        ])
+      );
   };
 
   return (
     <View style={styles.container}>
-      <Image source={require('../image/pic3.jpeg')} style={styles.image} />
+      <Image source={require("../image/pic3.jpeg")} style={styles.image} />
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -96,21 +106,25 @@ const RegisterScreen = ({ navigation }) => {
         onChangeText={handleConfirmPasswordChange}
       />
       <Text style={styles.inputRequirements}>
-        {!isConfirmPasswordMatch ? 'Passwords do not match.\n' : null}
+        {!isConfirmPasswordMatch ? "Passwords do not match.\n" : null}
         {/* Username must contain at least 5 characters. */}
-
       </Text>
-      <View style={styles.button}
+      <View
+        style={styles.button}
         disabled={isButtonDisabled}
-        backgroundColor={isButtonDisabled ? 'gray' : 'green'}
+        backgroundColor={isButtonDisabled ? "gray" : "green"}
       >
-        <Button title="Register"
-          color={'white'}
+        <Button
+          title="Register"
+          color={"white"}
           onPress={handleRegister}
           disabled={isButtonDisabled} // Disable the button if any field is empty
         />
       </View>
-      <Text style={styles.loginText} onPress={() => navigation.navigate('Login')}>
+      <Text
+        style={styles.loginText}
+        onPress={() => navigation.navigate("Login")}
+      >
         Already have an account? Login here
       </Text>
     </View>
@@ -120,10 +134,10 @@ const RegisterScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'top',
-    alignItems: 'center',
+    justifyContent: "top",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   heading: {
     fontSize: 24,
@@ -132,31 +146,31 @@ const styles = StyleSheet.create({
   button: {
     fontSize: 24,
     marginBottom: 20,
-    backgroundColor: 'green',
+    backgroundColor: "green",
     borderRadius: 50,
-    width: '85%',
+    width: "85%",
   },
   inputRequirements: {
     fontSize: 14,
-    color: 'red',
+    color: "red",
     marginTop: 20,
-    width: '85%',
-    height: 60, paddingHorizontal: 10,
-
+    width: "85%",
+    height: 60,
+    paddingHorizontal: 10,
   },
   input: {
-    width: '85%',
+    width: "85%",
     height: 40,
-    borderColor: 'green',
+    borderColor: "green",
     borderWidth: 2,
     borderRadius: 50,
     marginBottom: 10,
     paddingHorizontal: 10,
-    textDecorationColor: 'green',
+    textDecorationColor: "green",
   },
   loginText: {
     marginTop: 20,
-    color: 'blue',
+    color: "blue",
   },
   image: {
     width: 140,
