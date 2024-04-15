@@ -9,7 +9,9 @@ const bookSchema = new mongoose.Schema({
   status: { type: String, enum: ['Available', 'Borrowed'], default: 'Available' },
   imagePath: String,
   borrower: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  desc: String
+  desc: String,
+  //price
+  depositFee: { type: Number, default: 0 },
 });
 
 const Book = mongoose.model('Book', bookSchema);

@@ -50,7 +50,7 @@ const MyBooksScreen = ({ navigation }) => {
     // Clean up the subscription
     return () => {
       focusSubscription();
-    };
+    }
   }, [navigation]);
 
   useLayoutEffect(() => {

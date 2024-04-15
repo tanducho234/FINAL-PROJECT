@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Alert, FlatList, View, Text, TextInput, ActivityIndicator, TouchableOpacity, StyleSheet, Image, Pressable } from "react-native";
-
-
+import { Alert, FlatList, View, Text,ScrollView, TextInput, ActivityIndicator, TouchableOpacity, StyleSheet, Image, Pressable } from "react-native";
 import { Button } from "@rneui/base";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-
 import Checkbox from 'expo-checkbox';
-import axios from 'axios'; // Assuming you'll make API requests to add a book
+import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Modal from 'react-native-modal';
 
 const AddBookScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
-
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [ISBN, setISBN] = useState('');
@@ -22,16 +18,16 @@ const AddBookScreen = ({ navigation }) => {
   const [genresList, setGenresList] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState([]);
-  const disabledButton = !title || !author || genresList==[] || !ISBN || !image;
+  const [depositFee, setDepositFee] = useState('');
+
+  const disabledButton = !title || !author || genresList.length === 0 || !ISBN || !image || !depositFee;
 
   useEffect(() => {
-    // Function to fetch user data
     const fetchGenresData = async () => {
       const token = await AsyncStorage.getItem('token');
       axios.get(`http://localhost:3000/genres`)
         .then(async res => {
           setGenresList(res.data.sort((a, b) => a.name.localeCompare(b.name)))
-          // console.log(res.data[0])
         })
         .catch(error => Alert.alert(
           'fetchGenresData fail ',
@@ -40,19 +36,15 @@ const AddBookScreen = ({ navigation }) => {
         ));
     };
 
-    // Call the function to fetch user data
     fetchGenresData();
   }, []);
+
   const toggleGenre = (genreId) => {
     const index = selectedGenres.indexOf(genreId);
     if (index > -1) {
       setSelectedGenres(selectedGenres.filter((_id) => _id !== genreId));
-      // console.log(selectedGenres);
-
     } else {
       setSelectedGenres([...selectedGenres, genreId]);
-      // console.log(selectedGenres);
-
     }
   };
 
@@ -61,26 +53,22 @@ const AddBookScreen = ({ navigation }) => {
   };
 
   const addBook = async () => {
-    console.log(selectedGenres)
     const formData = new FormData();
     formData.append('image', {
       uri: image,
       type: 'image/jpeg',
       name: 'image.jpg',
     });
-    console.log('genres',selectedGenres)
     formData.append('title', title);
     formData.append('author', author);
     formData.append('genres', selectedGenres);
     formData.append('ISBN', ISBN);
     formData.append('desc', desc);
+    formData.append('depositFee', depositFee); // Add depositFee to form data
 
-    // Your add book logic here, possibly making an API request
     try {
-      setLoading(true); // Start loading animation
-
+      setLoading(true);
       const token = await AsyncStorage.getItem('token');
-
       await axios.post('http://localhost:3000/books', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -91,15 +79,15 @@ const AddBookScreen = ({ navigation }) => {
         res.data.message,
         [{ text: 'Ok', onPress: () => navigation.goBack() }]
       ))
-        .catch(error => Alert.alert(
-          'fetchUserData fail ',
-          error.response.data.message,
-          [{ text: 'OK', onPress: () => console.log('OK pressed') }]
-        ));
+      .catch(error => Alert.alert(
+        'fetchUserData fail ',
+        error.response.data.message,
+        [{ text: 'OK', onPress: () => console.log('OK pressed') }]
+      ));
     } catch (error) {
       console.error("Error adding book", error);
     } finally {
-      setLoading(false); // Stop loading animation
+      setLoading(false);
     }
   };
 
@@ -112,7 +100,6 @@ const AddBookScreen = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      console.log("Image taken successfully", result.assets[0].uri);
       setImage(result.assets[0].uri);
     }
   };
@@ -127,11 +114,8 @@ const AddBookScreen = ({ navigation }) => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-      console.log("Image taken successfully", result.assets[0].uri);
     }
   };
-
-
 
   const showUploadOption = () =>
     Alert.alert('Upload a image', 'Choose your option:', [
@@ -148,94 +132,99 @@ const AddBookScreen = ({ navigation }) => {
     ]);
 
   return (
-    // <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <View style={{ marginHorizontal: 12 }}>
-      
-        <View style={{ alignItems: 'center', justifyContent: 'center', borderColor: 'black', borderWidth: 0 }}>
-          <TouchableOpacity onPress={showUploadOption}>
-            <View style={{ marginTop:20,width: 180, height: 180, backgroundColor: 'lightgrey', alignItems: 'center', justifyContent: 'center' }}>
-              {image && <Image source={{ uri: image }} style={{ width: 180, height: 180 }} />}
-              {!image && <Text>No Image</Text>}
-            </View>
-          </TouchableOpacity>
+    <View style={{ marginHorizontal: 12 }}>
+            <ScrollView style={{ marginTop: 12 ,backgroundColor:'white'}}>
 
-        </View>
-        <View style={{ marginHorizontal: 20 }}>
-          <Text style={{ marginBottom: 5 }}>Title</Text>
-          <TextInput
-            style={[styles.input]}
-            placeholder="Title"
-            value={title}
-            onChangeText={setTitle}
-          />
-          <Text style={{ marginBottom: 5 }}>Author</Text>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Author"
-            value={author}
-            onChangeText={setAuthor}
-          />
-          <Text style={{ marginBottom: 5 }}>Genre(s)</Text>
-          <TouchableOpacity onPress={openModal} >
-            <Text style={[styles.input, { textAlign: 'right', padding: 9, color: '#4287f5' }]}
-            editable={false}
-            >Tap to choose genre(s)</Text>
-          </TouchableOpacity>
-
-          <Text style={{ marginBottom: 5 }}>IBSN</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="ISBN"
-            value={ISBN}
-            onChangeText={setISBN}
-          />
-          <Text style={{ marginBottom: 5 }}>Description</Text>
-          <TextInput
-            style={[styles.input, { height: 100 }]}
-            value={desc}
-            onChangeText={setDesc}
-            placeholder="Enter description"
-            multiline
-          />
-        </View>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
-            setModalVisible(!modalVisible);
-          }}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <Text style={styles.modalText}>
-
-                Hello World!</Text>
-              <FlatList
-                data={genresList}
-                keyExtractor={(item) => item._id}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => toggleGenre(item._id)}>
-                    <View style={{ marginBottom: 5, flexDirection: 'row', alignItems: 'center' }}>
-                      <Checkbox
-                        value={selectedGenres.includes(item._id)}
-                        onValueChange={() => toggleGenre(item._id)}
-                      />
-                      <Text style={{ marginLeft: 5 }}>{item.name}</Text>
-                    </View>
-                  </TouchableOpacity>
-                )}
-              />
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}>
-                <Text style={{textAlign:'center'}}>Hide Modal</Text>
-              </Pressable>
-            </View>
+      <View style={{ alignItems: 'center', justifyContent: 'center', borderColor: 'black', borderWidth: 0 }}>
+        <TouchableOpacity onPress={showUploadOption}>
+          <View style={{ marginTop:20,width: 180, height: 180, backgroundColor: 'lightgrey', alignItems: 'center', justifyContent: 'center' }}>
+            {image && <Image source={{ uri: image }} style={{ width: 180, height: 180 }} />}
+            {!image && <Text>No Image</Text>}
           </View>
-        </Modal>
-        <Button
+        </TouchableOpacity>
+      </View>
+
+      <View style={{ marginHorizontal: 20 }}>
+        <Text style={{ marginBottom: 5 }}>Title</Text>
+        <TextInput
+          style={[styles.input]}
+          placeholder="Title"
+          value={title}
+          onChangeText={setTitle}
+        />
+        <Text style={{ marginBottom: 5 }}>Author</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Author"
+          value={author}
+          onChangeText={setAuthor}
+        />
+        <Text style={{ marginBottom: 5 }}>Genre(s)</Text>
+        <TouchableOpacity onPress={openModal} >
+          <Text style={[styles.input, { textAlign: 'right', padding: 9, color: '#4287f5' }]}>Tap to choose genre(s)</Text>
+        </TouchableOpacity>
+        <Text style={{ marginBottom: 5 }}>IBSN</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="ISBN"
+          value={ISBN}
+          onChangeText={setISBN}
+        />
+        <Text style={{ marginBottom: 5 }}>Deposit Fee</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Deposit Fee"
+          value={depositFee}
+          onChangeText={setDepositFee}
+          keyboardType="numeric"
+        />
+        <Text style={{ marginBottom: 5 }}>Description</Text>
+        <TextInput
+          style={[styles.input, { height: 100 }]}
+          value={desc}
+          onChangeText={setDesc}
+          placeholder="Enter description"
+          multiline
+        />
+      </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+         
+          setModalVisible(!modalVisible);
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>
+              Hello World!
+            </Text>
+            <FlatList
+              data={genresList}
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => toggleGenre(item._id)}>
+                  <View style={{ marginBottom: 5, flexDirection: 'row', alignItems: 'center' }}>
+                    <Checkbox
+                      value={selectedGenres.includes(item._id)}
+                      onValueChange={() => toggleGenre(item._id)}
+                    />
+                    <Text style={{ marginLeft: 5 }}>{item.name}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setModalVisible(!modalVisible)}>
+              <Text style={{textAlign:'center'}}>Hide Modal</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+      <Button
         buttonStyle={{  backgroundColor: "green", padding: 10}}
         containerStyle={{ borderRadius: 50, backgroundColor: "green",width:"50%",alignSelf:'center' }}
         disabledTitleStyle={{ color: "gray" }}
@@ -250,8 +239,9 @@ const AddBookScreen = ({ navigation }) => {
         titleProps={{}}
         titleStyle={{ marginHorizontal: 5, fontSize: 20 }}
       />
-      </View>
+        </ScrollView>
 
+    </View>
   );
 };
 
@@ -280,7 +270,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 50,
     width: '50%',
-    alignSelf: 'center', // To center horizontally
+    alignSelf: 'center',
   },
   buttonText: {
     color: 'white',

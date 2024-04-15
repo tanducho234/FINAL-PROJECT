@@ -28,9 +28,9 @@ class BorrowRequestRepository {
     return await BorrowRequest.findByIdAndUpdate(id, data, { new: true });
   }
 
-  // async deleteBorrowRequest(id) {
-  //   return await BorrowRequest.findByIdAndDelete(id);
-  // }
+  async deleteBorrowRequest(id) {
+    return await BorrowRequest.findByIdAndDelete(id);
+  }
 }
 
 module.exports = new BorrowRequestRepository();

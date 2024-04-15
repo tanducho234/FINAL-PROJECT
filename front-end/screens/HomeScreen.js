@@ -44,10 +44,9 @@ const HomeScreen = ({ navigation }) => {
     const fetchUserData = async () => {
 
         console.log("fetchAllall")
-        const token = await AsyncStorage.getItem('token');
         axios.get(`http://localhost:3000/books/all`, {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${await AsyncStorage.getItem('token')}`,
             },
         })
             .then(async res => {
@@ -85,13 +84,31 @@ const HomeScreen = ({ navigation }) => {
     }, [navigation]);
 
 
-    const handleBorrowBookPress = async (lenderId, bookId) => {
-        console.log("handleBorrowBookPress", lenderId, " ", bookId);
-        
+    const handleBorrowBookPress = async (lenderId, bookId, amount) => {
+        console.log("handleBorrowBookPress", lenderId, " ", bookId, " ", amount);
+        // Fetch user's account balance
+        const balanceResponse = await axios.get('http://localhost:3000/users/balance', {
+            headers: {
+                Authorization: `Bearer ${await AsyncStorage.getItem('token')}`,
+            },
+        });
+        const userBalance = balanceResponse.data.accountBalance;
+        const userId = balanceResponse.data.userId
+
+        // Check if user has sufficient balance to pay the deposit fee
+        if (userBalance < amount) {
+            Alert.alert(
+                'Insufficient Balance',
+                'You do not have sufficient balance to borrow this book. Please top up your account.'
+            );
+            return;
+        }
+
+
         const confirmed = await new Promise((resolve) => {
             Alert.alert(
-                'Confirm Borrow',
-                'Are you sure you want to borrow this book?',
+                'Are you sure you want to send a request to borrow this book?',
+                ` A deposit fee of ${amount.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} VND will be charged.`,
                 [
                     { text: 'Cancel', onPress: () => resolve(false), style: 'cancel' },
                     { text: 'Confirm', onPress: () => resolve(true) }
@@ -99,42 +116,64 @@ const HomeScreen = ({ navigation }) => {
                 { cancelable: false }
             );
         });
-    
+
         if (!confirmed) {
             console.log('Borrow request cancelled');
             return;
         }
-    
-        const token = await AsyncStorage.getItem('token');
-    
+
+        // Proceed with borrowing the book
         await axios.post(`http://localhost:3000/borrow/`, {
             lenderId,
             bookId
         }, {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${await AsyncStorage.getItem('token')}`,
             }
         })
-        .then(res => {
-            console.log(res.data);
-            Alert.alert(
-                'Request sent',
-                res.data.message,
-                [{ text: 'OK', onPress: () => console.log('OK pressed') }]
-            );
-        })
-        .catch(err => {
-            console.log(err);
-            Alert.alert(
-                'Oops',
-                err.response.data.message
-                ,
-                [{ text: 'OK', onPress: () => console.log('OK pressed') }]
-            );
-        });
+            .then(async res => {
+
+                // Make a new transaction for the deposit fee
+                await axios.post(`http://localhost:3000/transactions`, {
+                    userId: userId, // Assuming userId is already defined in the component
+                    amount: amount,
+                    type: 'Deposit',
+                    description: `Deposit fee`
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${await AsyncStorage.getItem('token')}`,
+                    }
+                });
+                // Update user's account balance
+                const updatedBalance = await axios.post(`http://localhost:3000/users/update-balance`, {
+                    user_id: userId, // Assuming userId is already defined in the component
+                    amount: -amount, // Subtracting the deposit fee from the balance
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${await AsyncStorage.getItem('token')}`,
+                    }
+                });
+                Alert.alert(
+                    'Request sent',
+                    res.data.message,
+                    [{ text: 'OK', onPress: () => console.log('OK pressed') }]
+                );
+            })
+            .catch(err => {
+                console.log(err);
+                Alert.alert(
+                    'Oops',
+                    err.response.data.message
+                    ,
+                    [{ text: 'OK', onPress: () => console.log('OK pressed') }]
+                );
+            });
     };
 
-
+    const handleBookPress = (bookId, imageLink) => {
+        // navigation.navigate('BookDetails', { bookId, imageLink });
+        console.log('handleBookPress ')
+    }
     return (
         <View style={styles.container}>
 
@@ -173,24 +212,27 @@ const HomeScreen = ({ navigation }) => {
                     }>
                         <View style={styles.bookContainer}>
                             <View>
-                            <Image source={{ uri: book.viewLink }} style={styles.bookImage} />
-                           <View style={{display:'flex',flexDirection: 'row'}}>
-                            <Avatar
-                                activeOpacity={0.2}
-                                avatarStyle={{}}
-                                containerStyle={{ backgroundColor: "#BDBDBD" }}
-                                icon={{}}
-                                iconStyle={{}}
-                                imageProps={{}}
-                                placeholderStyle={{}}
-                                rounded
-                                size={25}
-                                source={{ uri: book.ownerId.viewLink }}
-                                titleStyle={{}}
-                            />
-                             {/* <Text style={{alignSelf:'center'}}>{book.onwerId.firstName}</Text> */}
 
-                            </View>
+                                <Image source={{ uri: book.viewLink }} style={styles.bookImage} />
+                                <View style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
+                                    <Icon name="account" size={25} color="black" />
+
+                                    <Avatar
+                                        activeOpacity={0.2}
+                                        avatarStyle={{}}
+                                        containerStyle={{ backgroundColor: "#BDBDBD" }}
+                                        icon={{}}
+                                        iconStyle={{}}
+                                        imageProps={{}}
+                                        placeholderStyle={{}}
+                                        rounded
+                                        size={25}
+                                        source={{ uri: book.ownerId.viewLink }}
+                                        titleStyle={{}}
+                                    />
+                                    {/* <Text style={{alignSelf:'center'}}>{book.onwerId.firstName}</Text> */}
+
+                                </View>
                             </View>
                             <View style={styles.textContainer}>
                                 <Text style={styles.bookTitle}>{book.title}</Text>
@@ -203,9 +245,15 @@ const HomeScreen = ({ navigation }) => {
 
                                     ))}
                                 </View>
-                                <Text style={styles.bookRating}>⭐ 4.67</Text>
+                                <Text style={styles.bookDepositFee}>{book.depositFee.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ₫ </Text>
+                                <TouchableOpacity
+                                    style={{ alignSelf: 'flex-end' }}
+                                    onPress={() => handleAddToInterestList(book._id)}
+                                >
+                                    <Icon name="heart" size={20} color="red" />
+                                </TouchableOpacity>
                                 <TouchableOpacity style={styles.borrowButton}
-                                    onPress={() => handleBorrowBookPress(book.ownerId._id, book._id)}
+                                    onPress={() => handleBorrowBookPress(book.ownerId._id, book._id, book.depositFee)}
                                 >
                                     <Text style={styles.borrowButtonText}>Borrow this</Text>
                                 </TouchableOpacity>
@@ -273,9 +321,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: 'bold', // If the genre label is bold
     },
-    bookRating: {
+    bookDepositFee: {
         fontSize: 14,
-        color: '#FFD700', // Gold color for the stars, if you're using star emojis
+        //color suitable for price
+        fontWeight: 'bold',
+        color: 'green',
         marginTop: 4, // Spacing from the genre to the rating
     },
     borrowButton: {

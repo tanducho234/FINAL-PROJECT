@@ -11,9 +11,11 @@ router.post('/', borrowRequestController.createBorrowRequest);
 router.get('/', borrowRequestController.getAllBorrowRequestsByLender);
 
 // Route for accepting a borrow request
-router.put('/:id/accept', borrowRequestController.acceptBorrowRequest);
+router.get('/accept/:id', borrowRequestController.acceptBorrowRequest);
 
 // Route for declining a borrow request
-router.put('/:id/decline', borrowRequestController.declineBorrowRequest);
+router.get('/reject/:id', borrowRequestController.rejectBorrowRequest);
+//delete
+router.get('/delete/:id', borrowRequestController.deleteBorrowRequest);
 
 module.exports = router;

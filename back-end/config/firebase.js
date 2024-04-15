@@ -27,7 +27,7 @@ const urlCache = {}; // Simple cache object
 async function getCachedViewLink(imagePath) {
     const now = Date.now();
     if (urlCache[imagePath] && urlCache[imagePath].expires > now) {
-        console.log('cache')
+        // console.log('cache')
         return urlCache[imagePath].url;
     } else {
         try {

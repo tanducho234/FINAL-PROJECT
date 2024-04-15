@@ -1,11 +1,9 @@
-import React, { useState, useEffect,useLayoutEffect } from "react";
-import { Alert, FlatList, View, Text, TextInput, ActivityIndicator, TouchableOpacity, StyleSheet, Image, Pressable } from "react-native";
+import React, { useState, useEffect, useLayoutEffect } from "react";
+import { Alert, ScrollView, FlatList, View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Pressable } from "react-native";
 import { Button } from "@rneui/base";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-
 import Checkbox from 'expo-checkbox';
-import axios from 'axios'; // Assuming you'll make API requests to add a book
-import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Modal from 'react-native-modal';
 
@@ -16,14 +14,14 @@ const EditBookScreen = ({ navigation, route }) => {
   const [author, setAuthor] = useState('');
   const [ISBN, setISBN] = useState('');
   const [image, setImage] = useState(null);
-  const [desc, setDesc] = useState(null);
+  const [desc, setDesc] = useState('');
   const [genresList, setGenresList] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState([]);
+  const [depositFee, setDepositFee] = useState('');
   const [buttonStatus, setButtonStatus] = useState(false);
 
   useEffect(() => {
-    // Function to fetch user data
     const fetchBook = async () => {
       const token = await AsyncStorage.getItem('token');
       axios.get(`http://localhost:3000/books/${bookId}`, {
@@ -33,16 +31,14 @@ const EditBookScreen = ({ navigation, route }) => {
         }
       })
         .then(async res => {
-          console.log('fromeditbook', res.data)
           const book = res.data;
           setTitle(book.title);
           setAuthor(book.author);
           setISBN(book.ISBN);
           setDesc(book.desc);
           setImage(imageLink);
-          setSelectedGenres(book.genres)
-          // console.log(selectedGenres)
-          // setGenresList(book.genres)
+          setSelectedGenres(book.genres);
+          setDepositFee(book.depositFee.toString()); // Convert depositFee to string for TextInput
         })
         .catch(error => Alert.alert(
           'editbook fail ',
@@ -50,15 +46,13 @@ const EditBookScreen = ({ navigation, route }) => {
           [{ text: 'OK', onPress: () => console.log('OK pressed') }]
         ));
     };
-    // Call the function to fetch user data
     fetchBook();
-    //-------------------------------
+
     const fetchGenresData = async () => {
       const token = await AsyncStorage.getItem('token');
       axios.get(`http://localhost:3000/genres`)
         .then(async res => {
-          setGenresList(res.data.sort((a, b) => a.name.localeCompare(b.name)))
-          // console.log(res.data[0])
+          setGenresList(res.data.sort((a, b) => a.name.localeCompare(b.name)));
         })
         .catch(error => Alert.alert(
           'fetchGenresData fail ',
@@ -66,19 +60,17 @@ const EditBookScreen = ({ navigation, route }) => {
           [{ text: 'OK', onPress: () => console.log('OK pressed') }]
         ));
     };
-
-    // Call the function to fetch user data
     fetchGenresData();
   }, []);
-  useLayoutEffect(()=>{
+
+  useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => 
-      <TouchableOpacity
-        onPress={async () => 
-          {
+      headerRight: () =>
+        <TouchableOpacity
+          onPress={async () => {
             try {
               const token = await AsyncStorage.getItem('token');
-              const response = await axios.delete(`http://localhost:3000/books/${bookId}`,{
+              const response = await axios.delete(`http://localhost:3000/books/${bookId}`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
@@ -86,27 +78,23 @@ const EditBookScreen = ({ navigation, route }) => {
             } catch (error) {
               console.error('Error deleting book:', error);
               // Handle errors
-            }          navigation.navigate('MyBooks')
+            } navigation.navigate('MyBooks')
           }
-        }
-      >
-        <Icon marginRight={20} name="delete" size={30} color="red" />
-      </TouchableOpacity>
+          }
+        >
+          <Icon marginRight={20} name="delete" size={30} color="red" />
+        </TouchableOpacity>
     });
-  },[navigation])
+  }, [navigation])
 
   const toggleGenre = (genreId) => {
     const index = selectedGenres.indexOf(genreId);
     if (index > -1) {
-      setButtonStatus(true)
+      setButtonStatus(true);
       setSelectedGenres(selectedGenres.filter((_id) => _id !== genreId));
-      // console.log(selectedGenres);
-
     } else {
-      setButtonStatus(true)
+      setButtonStatus(true);
       setSelectedGenres([...selectedGenres, genreId]);
-      // console.log(selectedGenres);
-
     }
   };
 
@@ -115,173 +103,162 @@ const EditBookScreen = ({ navigation, route }) => {
   };
 
   const editBook = async () => {
-    console.log(selectedGenres)
-    const formData = new FormData();
-    // formData.append(
-    //   'image', {
-    //   uri: image,
-    //   type: 'image/jpeg',
-    //   name: 'image.jpg',
-    // });
-    formData.append('title', title);
-    formData.append('author', author);
-    formData.append('genres', selectedGenres);
-    formData.append('ISBN', ISBN);
-    formData.append('desc', desc);
-    console.log('from from', formData)
-
-    // Your add book logic here, possibly making an API request
     try {
-      setLoading(true); // Start loading animation
+      setLoading(true);
 
       const token = await AsyncStorage.getItem('token');
-
+      console.log('depositFee',depositFee)
       await axios.post(`http://localhost:3000/books/${bookId}`, {
         title,
         author,
         genres: selectedGenres,
         ISBN,
         desc,        
+        depositFee,
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }).then(res => Alert.alert(
-        'Success!',
-        res.data.message,
-        [{ text: 'Ok', onPress: () => navigation.goBack() }]
-      ))
+      })
+        .then(res => Alert.alert(
+          'Success!',
+          res.data.message,
+          [{ text: 'Ok', onPress: () => navigation.goBack() }]
+        ))
         .catch(error => Alert.alert(
           'update fail ',
           error.response.data.message,
           [{ text: 'OK', onPress: () => console.log('OK pressed') }]
         ));
-
-      // console.log("Book added successfully");
-      // Optionally, navigate back to a different screen after adding book
-      // navigation.navigate("SomeOtherScreen");
     } catch (error) {
-      console.error("Error adding book", error);
+      console.error("Error updating book", error);
     } finally {
-      setLoading(false); // Stop loading animation
+      setLoading(false);
     }
   };
 
-
-
   return (
-    // <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
     <View style={{ marginHorizontal: 12 }}>
+      <ScrollView style={{ marginTop: 12, backgroundColor: 'white' }}>
 
-      <View style={{ alignItems: 'center', justifyContent: 'center', borderColor: 'black', borderWidth: 0 }}>
-        {/* <TouchableOpacity onPress={showUploadOption}> */}
+        <View style={{ alignItems: 'center', justifyContent: 'center', borderColor: 'black', borderWidth: 0 }}>
           <View style={{ marginTop: 20, width: 180, height: 180, backgroundColor: 'lightgrey', alignItems: 'center', justifyContent: 'center' }}>
             {image && <Image source={{ uri: image }} style={{ width: 180, height: 180 }} />}
             {!image && <Text>No Image</Text>}
           </View>
-        {/* </TouchableOpacity> */}
-      </View>
-      <View style={{ marginHorizontal: 20 }}>
-        <Text style={{ marginBottom: 5 }}>Title</Text>
-        <TextInput
-          style={[styles.input]}
-          placeholder="Title"
-          value={title}
-          onChangeText={(text) => {
-            setTitle(text);
-            setButtonStatus(true);
-          }}        />
-        <Text style={{ marginBottom: 5 }}>Author</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Author"
-          value={author}
-          onChangeText={(text) => {
-            setAuthor(text);
-            setButtonStatus(true);
-          }}        />
-        <Text style={{ marginBottom: 5 }}>Genre(s)</Text>
-        <TouchableOpacity onPress={openModal} >
-          <Text style={[styles.input, { textAlign: 'right', padding: 9, color: '#4287f5' }]}
-            editable={false}
-          >Tap to choose genre(s)</Text>
-        </TouchableOpacity>
-
-        <Text style={{ marginBottom: 5 }}>IBSN</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="ISBN"
-          value={ISBN}
-          onChangeText={(text) => {
-            setISBN(text);
-            setButtonStatus(true);
-          }}        />
-        <Text style={{ marginBottom: 5 }}>Description</Text>
-        <TextInput
-          style={[styles.input, { height: 100 }]}
-          value={desc}
-          onChangeText={(text) => {
-            setDesc(text);
-            setButtonStatus(true);
-          }}          placeholder="Enter description"
-          multiline
-        />
-      </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
-          setModalVisible(!modalVisible);
-        }}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>
-
-              Hello World!</Text>
-            <FlatList
-              data={genresList}
-              keyExtractor={(item) => item._id}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => toggleGenre(item._id)}>
-                  <View style={{ marginBottom: 5, flexDirection: 'row', alignItems: 'center' }}>
-                    <Checkbox
-                      value={selectedGenres.includes(item._id)}
-                      onValueChange={() => toggleGenre(item._id)}
-                    />
-                    <Text style={{ marginLeft: 5 }}>{item.name}</Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-            />
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={{ textAlign: 'center' }}>Hide Modal</Text>
-            </Pressable>
-          </View>
         </View>
-      </Modal>
-      <Button
-        buttonStyle={{  backgroundColor: "green", padding: 10}}
-        containerStyle={{ borderRadius: 50, backgroundColor: "green",width:"50%",alignSelf:'center' }}
-        disabledTitleStyle={{ color: "gray" }}
-        icon={<Icon name="content-save" size={15} color="white" />}
-        iconRight
-        disabled={!buttonStatus}
-        loading={loading}
-        loadingProps={{ animating: true }}
-        loadingStyle={{}}
-        onPress={editBook}
-        title="Edit"
-        titleProps={{}}
-        titleStyle={{ marginHorizontal: 5, fontSize: 20 }}
-      />
-    </View>
+        <View style={{ marginHorizontal: 20 }}>
+          <Text style={{ marginBottom: 5 }}>Title</Text>
+          <TextInput
+            style={[styles.input]}
+            placeholder="Title"
+            value={title}
+            onChangeText={(text) => {
+              setTitle(text);
+              setButtonStatus(true);
+            }}
+          />
+          <Text style={{ marginBottom: 5 }}>Author</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Author"
+            value={author}
+            onChangeText={(text) => {
+              setAuthor(text);
+              setButtonStatus(true);
+            }}
+          />
+          <Text style={{ marginBottom: 5 }}>Genre(s)</Text>
+          <TouchableOpacity onPress={openModal} >
+            <Text style={[styles.input, { textAlign: 'right', padding: 9, color: '#4287f5' }]}
+              editable={false}
+            >Tap to choose genre(s)</Text>
+          </TouchableOpacity>
+          <Text style={{ marginBottom: 5 }}>ISBN</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="ISBN"
+            value={ISBN}
+            onChangeText={(text) => {
+              setISBN(text);
+              setButtonStatus(true);
+            }}
+          />
+          <Text style={{ marginBottom: 5 }}>Description</Text>
+          <TextInput
+            style={[styles.input, { height: 100 }]}
+            value={desc}
+            onChangeText={(text) => {
+              setDesc(text);
+              setButtonStatus(true);
+            }}
+            placeholder="Enter description"
+            multiline
+          />
+          <Text style={{ marginBottom: 5 }}>Deposit Fee</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Deposit Fee"
+            value={depositFee}
+            onChangeText={(text) => {
+              setDepositFee(text);
+              setButtonStatus(true);
+            }}
+            keyboardType="numeric" // Set keyboard type to numeric for inputting numbers
+          />
+        </View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            Alert.alert('Modal has been closed.');
+            setModalVisible(!modalVisible);
+          }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>Hello World!</Text>
+              <FlatList
+                data={genresList}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => toggleGenre(item._id)}>
+                    <View style={{ marginBottom: 5, flexDirection: 'row', alignItems: 'center' }}>
+                      <Checkbox
+                        value={selectedGenres.includes(item._id)}
+                        onValueChange={() => toggleGenre(item._id)}
+                      />
+                      <Text style={{ marginLeft: 5 }}>{item.name}</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setModalVisible(!modalVisible)}>
+                <Text style={{ textAlign: 'center' }}>Hide Modal</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+        <Button
+          buttonStyle={{ backgroundColor: "green", padding: 10 }}
+          containerStyle={{ borderRadius: 50, backgroundColor: "green", width: "50%", alignSelf: 'center' }}
+          disabledTitleStyle={{ color: "gray" }}
+          icon={<Icon name="content-save" size={15} color="white" />}
+          iconRight
+          disabled={!buttonStatus}
+          loading={loading}
+          loadingProps={{ animating: true }}
+          loadingStyle={{}}
+          onPress={editBook}
+          title="Edit"
+          titleProps={{}}
+          titleStyle={{ marginHorizontal: 5, fontSize: 20 }}
+        />
+      </ScrollView>
 
-    // </SafeAreaView>
+    </View>
   );
 };
 
@@ -310,7 +287,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 50,
     width: '50%',
-    alignSelf: 'center', // To center horizontally
+    alignSelf: 'center',
   },
   buttonText: {
     color: 'white',

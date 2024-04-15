@@ -2,11 +2,11 @@
 
 const borrowRequestRepository = require('../repositories/borrowRequestRepository');
 const userRepository = require('../repositories/userRepository');
+const bookRepository = require('../repositories/bookRepository');
 
 class BorrowRequestController {
     async getAllBorrowRequestsByLender(req, res) {
         try {
-            console.log('temo',req.user.id)
             const borrowRequestsReceived = await borrowRequestRepository.getAllBorrowRequestsReceived(req.user.id);
             const borrowRequestsSent = await borrowRequestRepository.getAllBorrowRequestsSent(req.user.id);
             res.json({ borrowRequestsReceived ,borrowRequestsSent});
@@ -35,12 +35,14 @@ class BorrowRequestController {
             if (existingRequest) {
                 return res.status(400).json({ message: 'You have already sent a request for this book' });
             }
-    
+            const book = await bookRepository.getBookById(bookId);
+
             // Create the borrow request
             const borrowRequest = await borrowRequestRepository.createBorrowRequest({
                 borrower: borrowerId,
                 lender: lenderId,
                 book: bookId,
+                depositFee: book.depositFee,
                 // returnDate: new Date(returnDate)
             });
     
@@ -66,15 +68,30 @@ class BorrowRequestController {
         }
     }
 
-    async declineBorrowRequest(req, res) {
+    async rejectBorrowRequest(req, res) {
         try {
-            const borrowRequest = await borrowRequestRepository.updateBorrowRequest(req.params.id, { status: 'Declined' });
+            const borrowRequest = await borrowRequestRepository.updateBorrowRequest(req.params.id, { status: 'Rejected' });
 
             if (!borrowRequest) {
                 return res.status(404).json({ message: 'Borrow request not found' });
             }
 
             res.json({ borrowRequest });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    }
+    //delete
+    async deleteBorrowRequest(req, res) {
+        try {
+            const borrowRequest = await borrowRequestRepository.deleteBorrowRequest(req.params.id);
+
+            if (!borrowRequest) {
+                return res.status(404).json({ message: 'Borrow request not found' });
+            }
+
+            res.json({ message: 'Borrow request deleted successfully' });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Internal server error' });

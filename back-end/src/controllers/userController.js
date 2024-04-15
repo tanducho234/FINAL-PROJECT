@@ -40,7 +40,7 @@ class UserController {
                <p>Click the following link to verify your email:</p>
                <a href="${baseUrl}/register/verify/${verificationToken}">Verify Email</a>`
       };
-      
+
       const role = await Role.findOne({ roleName: 'User' });
       console.log(role);
       const user = await userRepository.createUser({
@@ -124,57 +124,76 @@ class UserController {
 
   async profile(req, res) {
     try {
-        const userName = req.user.username
-        console.log('async profile(req, res)',req.user);
-        const userInfor= await userRepository.getUserByUsername(userName)
-        // console.log(userInfor);
-        res.status(200).json(userInfor);
+      const userName = req.user.username
+      console.log('async profile(req, res)', req.user);
+      const userInfor = await userRepository.getUserByUsername(userName)
+      // console.log(userInfor);
+      res.status(200).json(userInfor);
     } catch (err) {
-        res.status(500).json({ message: "profile not found" });
+      res.status(500).json({ message: "profile not found" });
     }
 
-}
-
-async updateProfile(req, res) {
-  const userName = req.user.username
-  console.log('ABCDE',req.user);
-  const { firstname, lastname, bio, address,imagePath } = req.body; // Assuming these are the fields to be updated
-  console.log('imagePath', imagePath);
-  try {
-    const user= await userRepository.getUserByUsername(userName)
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    if (bio) user.bio = bio;
-    if (address) user.address = address;
-    if (firstname) user.firstName = firstname;
-    if (lastname) user.lastName = lastname;
-    if (imagePath) user.imagePath = imagePath;
-    // Save the updated user object
-    await user.save();
-    // Return the updated user object
-    res.json({ message: 'Profile updated successfully', user });
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    res.status(500).json({ error: 'Unable to update profile' });
   }
-}
-//get account balance
-async getAccountBalance(req, res) {
-  const userName = req.user.username
-  console.log('getAccountBalance', req.user);
-  try {
-    const user= await userRepository.getUserByUsername(userName)
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    // Return the account balance
-    res.json({ message: 'Account balance', accountBalance: user.accountBalance ,userId :user._id});
-  } catch (error) {
-    console.error('Error getting account balance:', error);
-    res.status(500).json({ error: 'Unable to get account balance' });
-  }
-}
 
+  async updateProfile(req, res) {
+    const userName = req.user.username
+    const { firstname, lastname, bio, address, imagePath } = req.body; // Assuming these are the fields to be updated
+    try {
+      const user = await userRepository.getUserByUsername(userName)
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      if (bio) user.bio = bio;
+      if (address) user.address = address;
+      if (firstname) user.firstName = firstname;
+      if (lastname) user.lastName = lastname;
+      if (imagePath) user.imagePath = imagePath;
+      // Save the updated user object
+      await user.save();
+      // Return the updated user object
+      res.json({ message: 'Profile updated successfully', user });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      res.status(500).json({ error: 'Unable to update profile' });
+    }
+  }
+  //get account balance
+  async getAccountBalance(req, res) {
+    const userName = req.user.username
+    console.log('getAccountBalance', req.user);
+    try {
+      const user = await userRepository.getUserByUsername(userName)
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      // Return the account balance
+      res.json({
+        message: 'Account balance', accountBalance: user.accountBalance, userId: user.id,
+        fullName: user.firstName + ' ' + user.lastName
+      });
+    } catch (error) {
+      console.error('Error getting account balance:', error);
+      res.status(500).json({ error: 'Unable to get account balance' });
+    }
+  }
+
+  async updateAccountBalance(req, res) {
+    const userName = req.user.username
+    const { amount } = req.body; // Assuming this is the new account balance
+    try {
+      const user = await userRepository.getUserByUsername(userName)
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      user.accountBalance += amount;
+      // Save the updated user object
+      await user.save();
+      // Return the updated user object
+      res.json({ message: 'Account balance updated successfully', user });
+    } catch (error) {
+      console.error('Error updating account balance:', error);
+      res.status(500).json({ error: 'Unable to update account balance' });
+    }
+  }
 }
 module.exports = new UserController();

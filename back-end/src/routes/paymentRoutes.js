@@ -4,6 +4,7 @@ let $ = require('jquery');
 const request = require('request');
 const moment = require('moment');
 const userRepository = require("../repositories/userRepository");
+const Transaction = require('../models/transaction');
 
 
 router.get('/', function(req, res, next){
@@ -109,26 +110,31 @@ router.get('/vnpay_return', async function (req, res, next) {
     let signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");     
 
     if(secureHash === signed){
-        //increase accountbalance of user
-        // console.log("asdasd",vnp_Params['vnp_OrderInfo'])
         const userId = vnp_Params['vnp_OrderInfo'];
 
         const user = await userRepository.getUserById(userId);
 
         const vnpAmount = vnp_Params['vnp_Amount'];
-
-        user.accountBalance += (parseFloat(vnpAmount)/100); // Adjust 'amountToAdd' according to your requirements
+        const amountToAdd = parseInt(vnpAmount)/100;
+        user.accountBalance += amountToAdd;
 
         // Save the updated user object back to the database
         await user.save()
-        
+        const newTransaction = new Transaction({
+            userId: userId,
+            amount: amountToAdd,
+            description: `Top-up through VNPAY`,
+            type: 'Top-up' // or any other relevant transaction type
+        });
+        await newTransaction.save();
+
         res.send(htmlContent)
         //Kiem tra xem du lieu trong db co hop le hay khong va thong bao ket qua
         // res.json({msg: vnp_Params});
         
         // res.render('success', {code: vnp_Params['vnp_ResponseCode']})
     } else{
-        res.render('success', {code: '97'})
+        res.json({code: '97'})
     }
 });
 

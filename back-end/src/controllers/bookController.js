@@ -7,11 +7,9 @@ const { upload, bucket, getCachedViewLink } = require('../../config/firebase');
 
 class BookController {
     async createBook(req, res) {
-        console.log("UPLOAD file", req.file)
-
         ///////
         try {
-            const { title, author, genres, ISBN, desc } = req.body;
+            const { title, author, genres, ISBN, desc,depositFee } = req.body;
             const genresArray = genres.split(',')
             console.log('genres', genresArray)
             ///////upload image
@@ -44,7 +42,8 @@ class BookController {
                     ISBN,
                     ownerId,
                     imagePath,
-                    desc
+                    desc,
+                    depositFee
                 }
             );
             console.log('asdasdasda')
@@ -68,7 +67,6 @@ class BookController {
     async getAllBooks(req, res) {
         try {
             const currentUserId = req.user.id
-            console.log('getAllBooks', currentUserId)
             const books = await bookRepository.getAllBooks();
 
             // Map over each book and generate view links for image paths
@@ -102,6 +100,7 @@ class BookController {
             if (!book) {
                 return res.status(404).json({ message: "Book not found" });
             }
+            console.log('getBookById', book)
             res.json(book);
         } catch (err) {
             res.status(500).json({ message: "Unable to fetch the book" });
@@ -109,7 +108,7 @@ class BookController {
     }
 
     async updateBook(req, res) {
-        console.log('updateBook', req.body.title)
+        console.log('updateBook11212', req.body.title)
 
         try {
             const book = await bookRepository.updateBook(

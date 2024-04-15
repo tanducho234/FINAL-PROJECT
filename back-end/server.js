@@ -20,6 +20,7 @@ const registerRoutes = require("./src/routes/registerRoutes");
 const imageRoutes = require("./src/routes/imageRoutes");
 const borrowRequestRoutes = require("./src/routes/borrowRequestRoutes");
 const paymentRoutes = require("./src/routes/paymentRoutes");
+const transactionRoute = require("./src/routes/transactionRoute");
 
 dotenv.config();
 
@@ -44,6 +45,8 @@ app.use("/login", loginRoutes);
 app.use("/users",authMiddleware, userRoutes);
 app.use("/books",authMiddleware, bookRoutes);
 app.use("/borrow",authMiddleware, borrowRequestRoutes);
+app.use('/transactions',authMiddleware, transactionRoute);
+
 
 app.use("/genres", genreRoutes);
 app.use("/image",imageRoutes);
