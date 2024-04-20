@@ -1,5 +1,5 @@
 // HomeScreen.js
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import {
   Alert,
   FlatList,
@@ -26,6 +26,8 @@ import { SearchBar } from "@rneui/themed";
 
 const HomeScreen = ({ navigation }) => {
   const [userId, setUserId] = useState("");
+  const [userViewLink,setUserViewLink]=useState("");
+  const [userFullName,setUserFullName]=useState("");
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
@@ -34,15 +36,23 @@ const HomeScreen = ({ navigation }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize] = useState(3); // Set the number of books per page
   const [favouriteBooks, setFavouritesBooks] = useState([]);
+  const [isFiltered, setIsFiltered] = useState(false);
+  const [isShowingFavouriteBook, setIsShowingFavouriteBook] = useState(false);
 
   const scrollViewRef = useRef();
 
   const updateSearch = (search) => {
     setSearch(search);
+
     console.log(search);
+    handleSearch();
   };
 
   const handleSearch = () => {
+    console.log("handleSearch");
+    setRefreshing(true);
+    setIsFiltered(true);
+
     const filtered = allBooks.filter(
       (book) =>
         (book.title &&
@@ -50,17 +60,35 @@ const HomeScreen = ({ navigation }) => {
         (book.author &&
           book.author.toLowerCase().includes(search.toLowerCase()))
     );
+    setAllBooks(filtered);
     setFilteredBooks(filtered);
+    scrollViewRef.current.scrollTo({ y: 0, animated: true });
+    setTimeout(() => {}, 500);
+    setRefreshing(false);
+  };
+
+  const handleGenrePress = (genre) => {
+    console.log("handleGenrePress");
+    setIsFiltered(true);
+    const filtered = allBooks.filter((book) =>
+      book.genres.some((bookGenre) => bookGenre.name === genre.name)
+    );
+    setFilteredBooks(filtered);
+    scrollViewRef.current.scrollTo({ y: 0, animated: true });
   };
 
   const handleRefresh = () => {
+    console.log("refresh");
     setRefreshing(true);
+    setIsFiltered(false);
+    setSearch("");
     fetchUserData().then(() => {
       setRefreshing(false);
+      console.log("refresh done");
     });
   };
 
-  const fetchUserData = async () => {
+  const fetchUserData = async (isFavourite) => {
     console.log("fetchAllall");
     try {
       const response = await axios.get(`http://localhost:3000/books/all`, {
@@ -69,10 +97,14 @@ const HomeScreen = ({ navigation }) => {
         },
       });
       const books = response.data.books;
-      for (let i = books.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [books[i], books[j]] = [books[j], books[i]];
-      }
+      setUserId(response.data.userId);
+      setUserViewLink(response.data.userViewLink);
+      setUserFullName(response.data.userFullName);
+
+      // for (let i = books.length - 1; i > 0; i--) {
+      //   const j = Math.floor(Math.random() * (i + 1));
+      //   [books[i], books[j]] = [books[j], books[i]];
+      // }
 
       setAllBooks(books);
       setPageNumber(1); // Reset page number to 1 after fetching data
@@ -80,6 +112,8 @@ const HomeScreen = ({ navigation }) => {
       setFilteredBooks(initialBooks);
       //setFavouritebook
       setFavouritesBooks(response.data.favoriteBooks);
+      setIsShowingFavouriteBook(false);
+
       // console.log("fetchAll", response.data.favoriteBooks);
     } catch (error) {
       Alert.alert("Error", error.message, [
@@ -89,10 +123,44 @@ const HomeScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
+    console.log("useEffect");
     fetchUserData();
   }, []);
+
+  // useLayoutEffect(() => {
+  //   console.log("useLayoutEffect");
+  //   navigation.setOptions(
+  //     {
+  //       headerRight: () => (
+  //         <TouchableOpacity  onPress={() => handleShowFavouriteBooksList()}>
+  //           <Icon
+  //             marginRight={20}
+  //             name="playlist-star"
+  //             size={30}
+  //             color={isShowingFavouriteBook ? "yellow" : "black"}
+  //           />
+  //         </TouchableOpacity>
+  //       ),
+  //     },
+  //     [isShowingFavouriteBook]
+  //   );
+  // }, []);
+  const handleShowFavouriteBooksList = async () => {
+    console.log(
+      "handleShowFavouriteBooksList",
+      isShowingFavouriteBook,
+      favouriteBooks
+    );
+    setIsFiltered(true);
+    const filtered = isShowingFavouriteBook
+      ? allBooks // If currently showing favorite books, revert to showing all books
+      : allBooks.filter((book) => favouriteBooks.includes(book._id));
+    setFilteredBooks(filtered);
+
+    setIsShowingFavouriteBook(!isShowingFavouriteBook);
+    scrollViewRef.current.scrollTo({ y: 0, animated: true });
+  };
   const handleAddFavouriteBooksList = async (bookId) => {
-    console.log("handleAddFavouriteBooksList", bookId);
     try {
       const response = await axios.post(
         `http://localhost:3000/users/add-to-favourite`,
@@ -129,7 +197,6 @@ const HomeScreen = ({ navigation }) => {
       }
     );
     const userBalance = balanceResponse.data.accountBalance;
-    const userId = balanceResponse.data.userId;
 
     // Check if user has sufficient balance to pay the deposit fee
     if (userBalance < amount) {
@@ -222,19 +289,17 @@ const HomeScreen = ({ navigation }) => {
   const handleScroll = (event) => {
     const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
     const isCloseToBottom =
-      layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
-    if (isCloseToBottom && !loadingMore) {
+      layoutMeasurement.height + contentOffset.y >= contentSize.height - 200;
+    if (isCloseToBottom && !loadingMore && !isFiltered && !refreshing) {
+      console.log("handleScroll", pageNumber);
       setLoadingMore(true);
-      const nextPageBooks = allBooks.slice(
-        pageNumber * pageSize,
-        (pageNumber + 1) * pageSize
-      );
-      setFilteredBooks((prevBooks) => [...prevBooks, ...nextPageBooks]);
+      const nextPageBooks = allBooks.slice(0, (pageNumber + 1) * pageSize);
+      setFilteredBooks(nextPageBooks);
       setPageNumber((prevPageNumber) => prevPageNumber + 1);
       //delay 1s
       setTimeout(() => {
         setLoadingMore(false);
-      }, 100);
+      }, 1000);
     }
   };
 
@@ -242,8 +307,17 @@ const HomeScreen = ({ navigation }) => {
     <View style={styles.container}>
       <SearchBar
         platform="ios"
-        containerStyle={{ backgroundColor: "white" }}
-        inputContainerStyle={{ marginTop: 10 }}
+        containerStyle={{
+          backgroundColor: "white",
+          width: "100%",
+          padding: 0,
+          borderRadius: 5,
+        }}
+        inputContainerStyle={{
+          height: 40,
+          width: "80%",
+          alignSelf: "center",
+        }}
         inputStyle={{}}
         leftIconContainerStyle={{}}
         rightIconContainerStyle={{}}
@@ -253,75 +327,153 @@ const HomeScreen = ({ navigation }) => {
           updateSearch(newVal);
           if (newVal == "") {
             setFilteredBooks(allBooks.slice(0, pageSize));
+            handleRefresh();
           }
         }}
+        onClear={() => handleRefresh()}
         onClearText={() => console.log("onClearText()")}
         placeholder="Type query here..."
         placeholderTextColor="#888"
         cancelButtonTitle="Cancel"
         cancelButtonProps={{}}
-        onCancel={() => console.log("cancel")}
+        onCancel={() => handleRefresh()}
         value={search}
         onSubmitEditing={handleSearch}
       />
+
+      <TouchableOpacity
+        onPress={() => handleShowFavouriteBooksList()} // Adjust the onPress handler as needed
+      >
+        <View
+          style={[
+            styles.filterButton,
+            { borderColor: isShowingFavouriteBook ? "green" : "gray" },
+          ]}
+        >
+          <Icon
+            name="heart"
+            size={20}
+            color={isShowingFavouriteBook ? "green" : "gray"}
+          />
+          <Text
+            style={[
+              styles.filterButtonText,
+              ,
+              { color: isShowingFavouriteBook ? "green" : "gray" },
+            ]}
+          >
+            {" "}
+            Favourite
+          </Text>
+        </View>
+      </TouchableOpacity>
+
       <ScrollView
         ref={scrollViewRef}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         onScroll={handleScroll}
-        scrollEventThrottle={100}
+        scrollEventThrottle={1000}
         contentContainerStyle={styles.scrollViewContent}
       >
         {filteredBooks.map((book, index) => (
-          <Pressable
-            key={book._id}
-            onPress={() => handleBookPress(book._id, book.imageLink)}
-          >
-            <View style={styles.bookContainer}>
-              <View>
+          <View style={styles.bookContainer} key={book._id}>
+            <View style={styles.bookContainerLeft}>
+              <Pressable
+                onPress={() => handleBookPress(book._id, book.imageLink)}
+              >
                 <Image
                   source={{ uri: book.viewLink }}
                   style={styles.bookImage}
+                  defaultSource={require("../image/logo.png")}
                 />
+              </Pressable>
+              <TouchableOpacity
+  onPress={() => {
+    navigation.navigate("Message",{screen:"Messages"}); // Navigate to MessagesScreen first
+    setTimeout(() => {
+      navigation.navigate("Message", {
+        screen: "Chat",
+        params: {
+          receiverName: book.ownerId.firstName + " " + book.ownerId.lastName,
+          senderId: userId,
+          receiverId: book.ownerId._id,
+          senderAvatarViewLink: userViewLink,
+          receiverAvatarViewLink: book.ownerId.viewLink,
+          senderName: userFullName
+        },
+      });
+    }, 100); // Delay the navigation to ChatScreen
+    console.log("image", book.ownerId.viewLink);
+  }}
+>
                 <View
                   style={{
                     display: "flex",
                     flexDirection: "row",
                     marginTop: 10,
+                    alignItems: "start",
                   }}
                 >
-                  <Icon name="account" size={25} color="black" />
-                  <Avatar
-                    activeOpacity={0.2}
-                    containerStyle={{ backgroundColor: "#BDBDBD" }}
-                    rounded
+                  <Icon
+                    style={{ alignSelf: "center" }}
+                    name="account"
                     size={25}
-                    source={{ uri: book.ownerId.viewLink }}
+                    color="black"
                   />
+                  <Text
+                    style={{
+                      alignSelf: "center",
+                      fontSize: 15,
+                      maxWidth: 90,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {book.ownerId.firstName} {book.ownerId.lastName}
+                  </Text>
+                  {/* <Avatar
+                      activeOpacity={0.2}
+                      containerStyle={{ backgroundColor: "#BDBDBD" }}
+                      rounded
+                      size={25}
+                      source={{ uri: book.ownerId.viewLink }}
+                    /> */}
                 </View>
-              </View>
-              <View style={styles.textContainer}>
-                <Text style={styles.bookTitle}>{book.title}</Text>
-                <Text style={styles.bookAuthor}>{book.author}</Text>
-                <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                  {book.genres.map((genre, genreIndex) => (
-                    <View key={genre._id} style={styles.genreContainer}>
-                      <Text key={genreIndex} style={styles.bookGenre}>
-                        {genre.name}
-                      </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.bookContainerRight}>
+              <Text style={styles.bookTitle}>{book.title}</Text>
+              <Text style={styles.bookAuthor}>{book.author}</Text>
+              <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                {book.genres.map((genre, genreIndex) => (
+                  <TouchableOpacity
+                    key={genre._id}
+                    onPress={() => handleGenrePress(genre)} // Adjust the onPress handler as needed
+                  >
+                    <View style={styles.genreButton}>
+                      <Text style={styles.bookGenre}>{genre.name}</Text>
                     </View>
-                  ))}
-                </View>
-                <Text style={styles.bookDepositFee}>
-                  {book.depositFee.toLocaleString("vi-VN", {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  })}{" "}
-                  ₫
-                </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.bookDepositFee}>
+                {book.depositFee.toLocaleString("vi-VN", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })}{" "}
+                ₫
+              </Text>
+
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignSelf: "flex-end",
+                }}
+              >
                 <TouchableOpacity
-                  style={{ alignSelf: "flex-end" }}
+                  style={{ alignSelf: "flex-end", margin: 9 }}
                   onPress={() => handleAddFavouriteBooksList(book._id)}
                 >
                   <Icon
@@ -330,6 +482,7 @@ const HomeScreen = ({ navigation }) => {
                     color={favouriteBooks.includes(book._id) ? "red" : "grey"}
                   />
                 </TouchableOpacity>
+
                 <TouchableOpacity
                   style={styles.borrowButton}
                   onPress={() =>
@@ -344,7 +497,7 @@ const HomeScreen = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
-          </Pressable>
+          </View>
         ))}
         {loadingMore && (
           <ActivityIndicator
@@ -361,7 +514,7 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   heading: {
     fontSize: 20,
@@ -372,22 +525,36 @@ const styles = StyleSheet.create({
   bookContainer: {
     flexDirection: "row",
     borderWidth: 1,
-    display: "flex",
     borderColor: "white",
     backgroundColor: "white",
     borderRadius: 5,
+    padding: 5,
+    marginHorizontal: 5,
+    marginVertical: 10,
+    //Shadow
+    shadowColor: "#BBBBBB",
+    shadowOffset: {
+      width: 5,
+      height: 5,
+    },
+    shadowOpacity: 0.8,
+    shadowRadius: 3,
+  },
+  bookContainerLeft: {
+    flexDirection: "column",
+  },
+  bookContainerRight: {
+    flex: 1,
+    flexDirection: "column",
     padding: 10,
-    marginBottom: 10,
   },
   bookImage: {
     width: 100,
     height: 150,
     resizeMode: "cover",
-  },
-  textContainer: {
-    // backgroundColor:'red',
-    flex: 1,
-    paddingHorizontal: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "black",
   },
   bookTitle: {
     fontSize: 16,
@@ -396,16 +563,35 @@ const styles = StyleSheet.create({
   bookAuthor: {
     fontSize: 14,
   },
-  genreContainer: {
-    borderRadius: 12,
-    backgroundColor: "#E0E0E0", // A light grey color, for example
+  genreButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#ff5e5c",
+    borderWidth: "2",
+    borderRadius: 7,
     paddingHorizontal: 8,
     paddingVertical: 4,
+    marginLeft: 4,
     alignSelf: "flex-start", // To ensure the container does not stretch
     marginTop: 4, // To give a little space from the title
   },
+  filterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: "2",
+    borderRadius: 7,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 4,
+    alignSelf: "flex-start", // To ensure the container does not stretch
+    marginTop: 4, // To give a little space from the title
+  },
+  filterButtonText: {
+    fontSize: 12,
+    fontWeight: "bold",
+  },
   bookGenre: {
-    color: "#333333", // A darker text color for contrast
+    color: "#ff5e5c", // A darker text color for contrast
     fontSize: 12,
     fontWeight: "bold", // If the genre label is bold
   },
@@ -414,16 +600,15 @@ const styles = StyleSheet.create({
     //color suitable for price
     fontWeight: "bold",
     color: "green",
-    marginTop: 4, // Spacing from the genre to the rating
+    marginTop: 10, // Spacing from the genre to the rating
   },
   borrowButton: {
-    backgroundColor: "#1E90FF", // A vivid blue color, for example
+    backgroundColor: "#063970", // A vivid blue color, for example
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 20, // Rounded corners
+    borderRadius: 10, // Rounded corners
     alignSelf: "flex-end", // Align to the left
     marginTop: 10, // Space from the rating to the button
-    backgroundColor: "green",
   },
   borrowButtonText: {
     color: "white", // White text on the blue button

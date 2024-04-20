@@ -38,7 +38,7 @@ const EditProfile = ({ navigation }) => {
       console.log("fetchUserData");
       const token = await AsyncStorage.getItem("token");
       await axios
-      
+
         .get(`http://localhost:3000/users/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -59,7 +59,12 @@ const EditProfile = ({ navigation }) => {
           if (res.data.imagePath != null) {
             console.log("getlinkanh");
             const response = await axios.get(
-              `http://localhost:3000/image/getviewlink/${res.data.imagePath}`
+              `http://localhost:3000/image/getviewlink/${res.data.imagePath}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
             );
             setImage(response.data.viewLink); // Assuming the response contains the image link
           }
@@ -199,7 +204,10 @@ const EditProfile = ({ navigation }) => {
           />
         )}
       </TouchableOpacity>
-      <ScrollView style={{ marginTop: 12, backgroundColor: "white" }}>
+      <ScrollView
+        automaticallyAdjustKeyboardInsets={true}
+        style={{ marginTop: 12, backgroundColor: "white" }}
+      >
         <View>
           <Input
             placeholder="Enter email"
@@ -262,28 +270,27 @@ const EditProfile = ({ navigation }) => {
             leftIcon={<Icon name="human" size={20} />}
           />
         </View>
+        <Button
+          buttonStyle={{ backgroundColor: "green", padding: 10 }}
+          containerStyle={{
+            borderRadius: 50,
+            backgroundColor: "green",
+            width: "50%",
+            alignSelf: "center",
+          }}
+          disabledTitleStyle={{ color: "gray" }}
+          icon={<Icon name="content-save" size={15} color="white" />}
+          iconRight
+          disabled={!buttonStatus}
+          loading={loading}
+          loadingProps={{ animating: true }}
+          loadingStyle={{}}
+          onPress={handleSaveProfile}
+          title="Save"
+          titleProps={{}}
+          titleStyle={{ marginHorizontal: 5, fontSize: 20 }}
+        />
       </ScrollView>
-
-      <Button
-        buttonStyle={{ backgroundColor: "green", padding: 10 }}
-        containerStyle={{
-          borderRadius: 50,
-          backgroundColor: "green",
-          width: "50%",
-          alignSelf: "center",
-        }}
-        disabledTitleStyle={{ color: "gray" }}
-        icon={<Icon name="content-save" size={15} color="white" />}
-        iconRight
-        disabled={!buttonStatus}
-        loading={loading}
-        loadingProps={{ animating: true }}
-        loadingStyle={{}}
-        onPress={handleSaveProfile}
-        title="Save"
-        titleProps={{}}
-        titleStyle={{ marginHorizontal: 5, fontSize: 20 }}
-      />
     </View>
 
     // </SafeAreaView>

@@ -3,14 +3,26 @@
 const borrowRequestRepository = require("../repositories/borrowRequestRepository");
 const userRepository = require("../repositories/userRepository");
 const bookRepository = require("../repositories/bookRepository");
+const { upload, bucket, getCachedViewLink } = require("../../config/firebase");
 
 class BorrowRequestController {
-  async getAllBorrowRequestsByLender(req, res) {
+  async getAllBorrowRequestsByUserId(req, res) {
     try {
       const borrowRequestsReceived =
         await borrowRequestRepository.getAllBorrowRequestsReceived(req.user.id);
       const borrowRequestsSent =
         await borrowRequestRepository.getAllBorrowRequestsSent(req.user.id);
+      borrowRequestsSent.forEach(async (borrowRequestSent) => {
+        borrowRequestSent.book.viewLink = await getCachedViewLink(
+          borrowRequestSent.book.imagePath
+        );
+      });
+
+      borrowRequestsReceived.forEach(async (borrowRequestReceived) => {
+        borrowRequestReceived.book.viewLink = await getCachedViewLink(
+          borrowRequestReceived.book.imagePath
+        );
+      });
       res.json({ borrowRequestsReceived, borrowRequestsSent });
     } catch (error) {
       console.error(error);

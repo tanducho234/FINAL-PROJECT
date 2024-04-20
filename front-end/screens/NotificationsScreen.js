@@ -1,6 +1,50 @@
-import React, { useState, useEffect } from "react";
+const Messages = [
+  {
+    id: "1",
+    userName: "Jenny Doe",
+    userImg: require("../image/gray-profile.png"),
+    messageTime: "4 mins ago",
+    messageText:
+      "Hey there, this is my test for a post of my social app in React Native.",
+  },
+  {
+    id: "2",
+    userName: "John Doe",
+    userImg: require("../image/gray-profile.png"),
+    messageTime: "2 hours ago",
+    messageText:
+      "Hey there, this is my test for a post of my social app in React Native.",
+  },
+  {
+    id: "3",
+    userName: "Ken William",
+    userImg: require("../image/gray-profile.png"),
+    messageTime: "1 hours ago",
+    messageText:
+      "Hey there, this is my test for a post of my social app in React Native.",
+  },
+  {
+    id: "4",
+    userName: "Selina Paul",
+    userImg: require("../image/gray-profile.png"),
+    messageTime: "1 day ago",
+    messageText:
+      "Hey there, this is my test for a post of my social app in React Native.",
+  },
+  {
+    id: "5",
+    userName: "Christy Alex",
+    userImg: require("../image/gray-profile.png"),
+    messageTime: "2 days ago",
+    messageText:
+      "Hey there, this is my test for a post of my social app in React Native.",
+  },
+];
+
+import React, { useState, useEffect} from "react";
 import {
   View,
+  FlatList,
   Text,
   Button,
   StyleSheet,
@@ -8,8 +52,19 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
-import { Tab } from "@rneui/themed";
-
+import { Tab, ButtonGroup } from "@rneui/themed";
+import {
+  Container,
+  Card,
+  UserInfo,
+  UserImgWrapper,
+  UserImg,
+  UserInfoText,
+  UserName,
+  PostTime,
+  MessageText,
+  TextSection,
+} from "../styles/MessageStyles";
 import axios from "axios"; // Assuming you'll make API requests to fetch borrow requests
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -257,12 +312,22 @@ const NotificationsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <>
-        <Tab value={index} onChange={setIndex} dense>
-          <Tab.Item>Requests Received</Tab.Item>
-          <Tab.Item>Requests Sent</Tab.Item>
-        </Tab>
-      </>
+      <ButtonGroup
+        buttonContainerStyle={{ backgroundColor: "transparent" }}
+        buttons={["Requests Sented", "Message", "Requests Received"]}
+        containerStyle={{
+          marginVertical: 10,
+          borderRadius: 30,
+          backgroundColor: "transparent",
+        }}
+        innerBorderStyle={{}}
+        onPress={(selectedIdx) => setIndex(selectedIdx)}
+        buttonStyle={{ flex: 1, borderRadius: 0 }}
+        selectedButtonStyle={{}}
+        textStyle={{}}
+        selectedTextStyle={{}}
+        selectedIndex={index}
+      />
       {index === 0 ? (
         <ScrollView
           refreshControl={
@@ -341,7 +406,7 @@ const NotificationsScreen = ({ navigation }) => {
             </View>
           ))}
         </ScrollView>
-      ) : (
+      ) : index === 2 ? (
         <ScrollView
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
@@ -405,6 +470,34 @@ const NotificationsScreen = ({ navigation }) => {
             </View>
           ))}
         </ScrollView>
+      ) : (
+        //aaaaaa
+        <Container>
+          <FlatList
+            data={Messages}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <Card
+                onPress={() =>
+                  navigation.navigate("Chat", { userName: item.userName })
+                }
+              >
+                <UserInfo>
+                  <UserImgWrapper>
+                    <UserImg source={item.userImg} />
+                  </UserImgWrapper>
+                  <TextSection>
+                    <UserInfoText>
+                      <UserName>{item.userName}</UserName>
+                      <PostTime>{item.messageTime}</PostTime>
+                    </UserInfoText>
+                    <MessageText>{item.messageText}</MessageText>
+                  </TextSection>
+                </UserInfo>
+              </Card>
+            )}
+          />
+        </Container>
       )}
     </View>
   );
@@ -413,7 +506,6 @@ const NotificationsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
   },
   heading: {
     fontSize: 20,

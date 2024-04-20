@@ -9,9 +9,13 @@ class BookRepository {
   async getAllBooks() {
     return await Book.find().populate("ownerId").populate("genres");
   }
+
   async getAllBooksByOwnerId(userId) {
-    return await Book.find({ ownerId: userId });
+    return await Book.find({ ownerId: userId }).populate("ownerId").populate("genres");
   }
+  async getAllBooksExceptOwnerId(userId) {
+    return await Book.find({ ownerId: { $ne: userId } }).populate("ownerId").populate("genres");
+}
 
   async getBookById(id) {
     return await Book.findById(id);

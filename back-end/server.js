@@ -46,7 +46,7 @@ app.use("/borrow", authMiddleware, borrowRequestRoutes);
 app.use("/transactions", authMiddleware, transactionRoute);
 
 app.use("/genres", genreRoutes);
-app.use("/image", imageRoutes);
+app.use("/image",authMiddleware, imageRoutes);
 
 app.use("/", paymentRoutes);
 app.get("/thanhtoanthanhcong", (req, res) => {

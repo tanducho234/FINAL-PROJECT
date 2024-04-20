@@ -197,7 +197,7 @@ const AccountBalanceScreen = ({ navigation }) => {
       <View style={styles.profileContainer}>
         <Text style={styles.profileText}>Transaction History</Text>
         <FlatList
-          style={{ marginBottom: 250 }}
+          style={{ marginBottom: 250, marginTop: 20 }}
           data={transactions}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    margin: 8,
   },
   balanceText: {
     fontSize: 30,

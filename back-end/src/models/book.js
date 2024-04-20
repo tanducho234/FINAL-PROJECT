@@ -14,7 +14,7 @@ const bookSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Available", "Borrowed"],
+    enum: ["Available", "Unavailable"],
     default: "Available",
   },
   imagePath: String,

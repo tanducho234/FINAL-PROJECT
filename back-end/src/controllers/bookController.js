@@ -65,16 +65,23 @@ class BookController {
   async getAllBooks(req, res) {
     try {
       const currentUserId = req.user.id;
-      const books = await bookRepository.getAllBooks();
+      const books = await bookRepository.getAllBooksExceptOwnerId(
+        currentUserId
+      );
+      const user = await userRepository.getUserById(currentUserId);
+      const favoriteBooks = user.favoriteBooks;
 
       // Map over each book and generate view links for image paths
       const booksWithViewLinks = await Promise.all(
         books.map(async (book) => {
           const bookViewLink = await getCachedViewLink(book.imagePath); // Generate view link for book image
           const ownerViewLink = await getCachedViewLink(book.ownerId.imagePath); // Generate view link for owner image
+          const isFavourite = favoriteBooks.includes(book._id); // Check if book is in user's favoriteBooks array
+
           return {
             ...book.toObject(), // Convert Mongoose document to plain JavaScript object
             viewLink: bookViewLink,
+            isFavourite,
             ownerId: {
               _id: book.ownerId._id,
               firstName: book.ownerId.firstName,
@@ -84,12 +91,21 @@ class BookController {
           };
         })
       );
-      const booksWithoutCurrentUser = booksWithViewLinks.filter(
-        (book) => book.ownerId._id != currentUserId
-      );
-      const user= await userRepository.getUserById(currentUserId)
+
+      // for (let i = booksWithViewLinks.length - 1; i > 0; i--) {
+      //   const j = Math.floor(Math.random() * (i + 1));
+      //   [booksWithViewLinks[i], booksWithViewLinks[j]] = [booksWithViewLinks[j], booksWithViewLinks[i]];
+      // }
+
       // console.log("Number of books:", booksWithoutCurrentUser.length); // Log the number of books
-      res.json({books:booksWithoutCurrentUser,favoriteBooks:user.favoriteBooks});
+      console.log(user.favoriteBooks);
+      res.json({
+        books: booksWithViewLinks,
+        favoriteBooks: user.favoriteBooks,
+        userId: user._id,
+        userViewLink: await getCachedViewLink(user.imagePath),
+        userFullName: user.firstName + " " + user.lastName,
+      });
     } catch (err) {
       res.status(500).json({ error: "Unable to fetch books" });
     }

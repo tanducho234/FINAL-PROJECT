@@ -102,7 +102,7 @@ class UserController {
         secretKey,
         { expiresIn: "7d" }
       );
-      res.json({ token });
+      res.json({ token,userId: user._id });
     } catch (err) {
       res.status(500).json({ message: "Unable to log in" });
     }
@@ -135,7 +135,7 @@ class UserController {
       const userName = req.user.username;
       console.log("async profile(req, res)", req.user);
       const userInfor = await userRepository.getUserByUsername(userName);
-      // console.log(userInfor);
+      console.log(userInfor);
       res.status(200).json(userInfor);
     } catch (err) {
       res.status(500).json({ message: "profile not found" });

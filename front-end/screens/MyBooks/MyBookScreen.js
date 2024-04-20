@@ -34,7 +34,7 @@ const MyBooksScreen = ({ navigation }) => {
           },
         })
         .then(async (res) => {
-          // console.log('fetchAllBooksData thanh cong', res.data)
+          // console.log("fetchAllBooksData thanh cong", res.data);
           const books = res.data;
           //get online imagePath for all books
           fetchImageLinksForBooks(books)
@@ -73,12 +73,17 @@ const MyBooksScreen = ({ navigation }) => {
         </TouchableOpacity>
       ),
     });
-  }, [navigation]);
+  }, []);
 
   const fetchImageLinkAndUpdate = async (book) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/image/getviewlink/${book.imagePath}`
+        `http://localhost:3000/image/getviewlink/${book.imagePath}`,
+        {
+          headers: {
+            Authorization: `Bearer ${await AsyncStorage.getItem("token")}`,
+          },
+        }
       );
       const imageLink = response.data.viewLink; // Assuming the response contains the image link
       return { ...book, imageLink }; // Return updated book object with image link

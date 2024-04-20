@@ -8,7 +8,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import UploadPicture from "./screens/UploadPicture";
+import MessagesScreem from "./screens/MessagesScreen";
+import ChatScreen from "./screens/ChatScreen";
 import LoadingScreen from "./screens/LoadingScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
@@ -48,7 +49,33 @@ function Notifications() {
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
-
+const MessageStack = ({ navigation }) => (
+  <Stack.Navigator initialRouteName="Messages">
+    <Stack.Screen
+      name="Messages"
+      component={MessagesScreem}
+      options={{
+        headerShown: true,
+        headerTitleStyle: {
+          fontSize: 20,
+          fontWeight: "bold", // Change the font size to 30
+        },
+      }}
+    />
+    <Stack.Screen
+      name="Chat"
+      component={ChatScreen}
+      options={({ route }) => ({
+        headerShown: true,
+        headerTitleStyle: {
+          fontSize: 20,
+          fontWeight: "bold", // Change the font size to 30
+        },
+        title: route.params.receiverName,
+      })}
+    />
+  </Stack.Navigator>
+);
 function Settings({ route }) {
   const { handleLogoutSuccess } = route.params;
 
@@ -78,6 +105,7 @@ function Settings({ route }) {
           },
         }}
       />
+
       <Stack.Screen
         name="AccountBalance"
         component={AccountBalanceScreen}
@@ -179,7 +207,7 @@ const App = () => {
         <LoadingScreen />
       ) : isAuthenticated ? (
         <Tab.Navigator
-          initialRouteName="Home"
+          initialRouteName="NotificationsTab"
           screenOptions={{
             tabBarActiveTintColor: "#e91e63",
           }}
@@ -188,6 +216,11 @@ const App = () => {
             name="Home"
             component={HomeScreen}
             options={{
+              headerTitle: "Home",
+              headerTitleStyle: {
+                fontSize: 20,
+                fontWeight: "bold", // Change the font size to 30
+              },
               headerShown: true,
               tabBarLabel: "Home",
               tabBarIcon: ({ color, size }) => (
@@ -216,6 +249,24 @@ const App = () => {
               ),
             }}
           />
+          {/* tab screen for message */}
+          <Tab.Screen
+            name="Message"
+            component={MessageStack}
+            options={{
+              lazy: true,
+              headerShown: false,
+              tabBarLabel: "Messages",
+              tabBarIcon: ({ color, size }) => (
+                <MaterialCommunityIcons
+                  name="message"
+                  color={color}
+                  size={size}
+                />
+              ),
+            }}
+          />
+
           <Tab.Screen
             name="SettingsTab"
             component={Settings}

@@ -21,11 +21,16 @@ const LoginScreen = ({ route, navigation }) => {
         setErrorMessage("");
         console.log("login thanh cong");
         await AsyncStorage.setItem("token", res.data.token);
+        await AsyncStorage.setItem("userId", res.data.userId);
+
         setIsAuthenticated(true);
         // navigation.navigate('Home',{ username: 'exampleUser' });
       })
       .catch(
-        (error) => setErrorMessage("Username or Password does not match")
+        (error) => {
+          setErrorMessage("Username or Password does not match"),
+            console.log(error);
+        }
         //   Alert.alert(
         //   'Login Failed',
         //   error.response.data.message,

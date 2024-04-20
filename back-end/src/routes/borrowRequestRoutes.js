@@ -8,7 +8,7 @@ const borrowRequestController = require("../controllers/borrowRequestController"
 router.post("/", borrowRequestController.createBorrowRequest);
 
 //route for get all borrow request by lender
-router.get("/", borrowRequestController.getAllBorrowRequestsByLender);
+router.get("/", borrowRequestController.getAllBorrowRequestsByUserId);
 
 // Route for accepting a borrow request
 router.get("/accept/:id", borrowRequestController.acceptBorrowRequest);

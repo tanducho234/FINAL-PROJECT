@@ -154,7 +154,10 @@ const AddBookScreen = ({ navigation }) => {
 
   return (
     <View style={{ marginHorizontal: 12 }}>
-      <ScrollView style={{ marginTop: 12, backgroundColor: "white" }}>
+      <ScrollView
+        automaticallyAdjustKeyboardInsets={true}
+        style={{ marginTop: 12, backgroundColor: "white" }}
+      >
         <View
           style={{
             alignItems: "center",
