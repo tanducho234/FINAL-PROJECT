@@ -26,8 +26,8 @@ import { SearchBar } from "@rneui/themed";
 
 const HomeScreen = ({ navigation }) => {
   const [userId, setUserId] = useState("");
-  const [userViewLink,setUserViewLink]=useState("");
-  const [userFullName,setUserFullName]=useState("");
+  const [userViewLink, setUserViewLink] = useState("");
+  const [userFullName, setUserFullName] = useState("");
   const [filteredBooks, setFilteredBooks] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
@@ -283,7 +283,11 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleBookPress = (bookId, imageLink) => {
-    console.log("handleBookPress ");
+    navigation.navigate("Review"
+    , {
+      commenterId: "",
+      bookId: bookId,
+    });
   };
 
   const handleScroll = (event) => {
@@ -390,24 +394,24 @@ const HomeScreen = ({ navigation }) => {
                 />
               </Pressable>
               <TouchableOpacity
-  onPress={() => {
-    navigation.navigate("Message",{screen:"Messages"}); // Navigate to MessagesScreen first
-    setTimeout(() => {
-      navigation.navigate("Message", {
-        screen: "Chat",
-        params: {
-          receiverName: book.ownerId.firstName + " " + book.ownerId.lastName,
-          senderId: userId,
-          receiverId: book.ownerId._id,
-          senderAvatarViewLink: userViewLink,
-          receiverAvatarViewLink: book.ownerId.viewLink,
-          senderName: userFullName
-        },
-      });
-    }, 100); // Delay the navigation to ChatScreen
-    console.log("image", book.ownerId.viewLink);
-  }}
->
+                onPress={() => {
+                  navigation.navigate("Message", { screen: "Messages" }); // Navigate to MessagesScreen first
+                  setTimeout(() => {
+                    navigation.navigate("Message", {
+                      screen: "Chat",
+                      params: {
+                        receiverName:
+                          book.ownerId.firstName + " " + book.ownerId.lastName,
+                        senderId: userId,
+                        receiverId: book.ownerId._id,
+                        senderAvatarViewLink: userViewLink,
+                        receiverAvatarViewLink: book.ownerId.viewLink,
+                        senderName: userFullName,
+                      },
+                    });
+                  }, 100); // Delay the navigation to ChatScreen
+                }}
+              >
                 <View
                   style={{
                     display: "flex",
@@ -432,13 +436,6 @@ const HomeScreen = ({ navigation }) => {
                   >
                     {book.ownerId.firstName} {book.ownerId.lastName}
                   </Text>
-                  {/* <Avatar
-                      activeOpacity={0.2}
-                      containerStyle={{ backgroundColor: "#BDBDBD" }}
-                      rounded
-                      size={25}
-                      source={{ uri: book.ownerId.viewLink }}
-                    /> */}
                 </View>
               </TouchableOpacity>
             </View>

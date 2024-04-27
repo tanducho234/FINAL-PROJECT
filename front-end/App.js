@@ -26,26 +26,12 @@ import NotificationsScreen from "./screens/NotificationsScreen";
 import { LogBox } from "react-native";
 import MyBooksScreen from "./screens/MyBooks/MyBookScreen";
 import HomeScreen from "./screens/HomeScreen";
+import BookReviewScreen from "./screens/BookReviewScreen";
 
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state",
+  `Sending \`onAnimatedValueUpdate\` with no listeners registered.`,
 ]);
-
-function Feed() {
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Feed!</Text>
-    </View>
-  );
-}
-
-function Notifications() {
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Notifications!</Text>
-    </View>
-  );
-}
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -167,6 +153,33 @@ function MyBook({ route }) {
   );
 }
 
+function HomeStack({ route }) {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          headerTitle: "Home",
+          headerTitleStyle: {
+            fontSize: 20, // Changed font size to 30
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="Review"
+        component={BookReviewScreen}
+        options={{
+          headerTitle: "Book Review",
+          headerTitleStyle: {
+            fontSize: 20, // Changed font size to 30
+            fontWeight: "bold",
+          }, }}
+      />
+    </Stack.Navigator>
+  );
+}
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -213,15 +226,10 @@ const App = () => {
           }}
         >
           <Tab.Screen
-            name="Home"
-            component={HomeScreen}
+            name="HomeStack"
+            component={HomeStack}
             options={{
-              headerTitle: "Home",
-              headerTitleStyle: {
-                fontSize: 20,
-                fontWeight: "bold", // Change the font size to 30
-              },
-              headerShown: true,
+              headerShown: false,
               tabBarLabel: "Home",
               tabBarIcon: ({ color, size }) => (
                 <MaterialCommunityIcons name="home" color={color} size={size} />
@@ -243,9 +251,18 @@ const App = () => {
             name="NotificationsTab"
             component={NotificationsScreen}
             options={{
-              tabBarLabel: "Updates",
+              headerTitle: "Requests",
+              headerTitleStyle: {
+                fontSize: 20,
+                fontWeight: "bold", // Change the font size to 30
+              },
+              tabBarLabel: "Requests",
               tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons name="bell" color={color} size={size} />
+                <MaterialCommunityIcons
+                  name="handshake-outline"
+                  color={color}
+                  size={size}
+                />
               ),
             }}
           />

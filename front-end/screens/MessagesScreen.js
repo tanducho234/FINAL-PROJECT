@@ -1,4 +1,5 @@
 import firestore from "../config/firebase";
+
 import {
   getFirestore,
   collection,
@@ -54,7 +55,7 @@ const MessagesScreen = ({ navigation }) => {
         );
         console.log("aaa", response.data);
         setSenderId(response.data._id);
-        setSenderName(response.data.firstName + " " + response.data.firstName);
+        setSenderName(response.data.firstName + " " + response.data.lastName);
         const oneUserToManyUsers = collection(firestore, response.data._id);
         const unsub = onSnapshot(oneUserToManyUsers, (snapshot) => {
           console.log("Snapshot received: from message screen");

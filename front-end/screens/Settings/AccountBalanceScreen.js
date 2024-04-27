@@ -54,7 +54,6 @@ const AccountBalanceScreen = ({ navigation }) => {
       });
       setBalance(response.data.accountBalance);
       setUserId(response.data.userId);
-      setFullName(response.data.fullName);
     } catch (error) {
       console.error("Error fetching account balance:", error);
     } finally {

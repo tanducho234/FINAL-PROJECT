@@ -250,7 +250,7 @@ const AddBookScreen = ({ navigation }) => {
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>Hello World!</Text>
+              <Text style={styles.modalText}>Choose genre(s) of your book</Text>
               <FlatList
                 data={genresList}
                 keyExtractor={(item) => item._id}
@@ -276,7 +276,7 @@ const AddBookScreen = ({ navigation }) => {
                 style={[styles.button, styles.buttonClose]}
                 onPress={() => setModalVisible(!modalVisible)}
               >
-                <Text style={{ textAlign: "center" }}>Hide Modal</Text>
+                <Text style={{ textAlign: "center" }}>Done</Text>
               </Pressable>
             </View>
           </View>

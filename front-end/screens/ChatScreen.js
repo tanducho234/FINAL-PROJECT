@@ -13,6 +13,7 @@ import {
   doc,
   addDoc,
   setDoc,
+  where,
 } from "firebase/firestore";
 import firestore from "../config/firebase";
 import { getDoc } from "firebase/firestore";
@@ -29,79 +30,49 @@ const ChatScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const sent = collection(firestore, `${senderId}/${receiverId}/message`);
+      console.log("fetchUserData", senderId, receiverId);
+      const sent = collection(firestore, senderId, receiverId, `messages`);
       const sortedQuery = query(sent, orderBy("createdAt", "desc"));
-      onSnapshot(sortedQuery, (snapshot) => {
-        const uniqueMessages = [];
-        snapshot.docs.forEach((doc) => {
-          const message = {
-            _id: doc.id,
-            text: doc.data().text,
-            createdAt: doc.data().createdAt,
-            user: {
-              _id: senderId,
-              // avatar:receiverViewLink
-            },
-          };
-          // Check if the message already exists in uniqueMessages array based on its _id
-          const existingMessageIndex = uniqueMessages.findIndex((m) => m._id === message._id);
-          if (existingMessageIndex === -1) {
-            // If not found, add the message to the array
-            uniqueMessages.push(message);
-          } else {
-            // If found, update the message in the array
-            uniqueMessages[existingMessageIndex] = message;
-          }
-        });
-      
-        // Sort messages from the latest to the oldest based on createdAt timestamp
-        const sortedMessages = [...messages, ...uniqueMessages].sort((a, b) => b.createdAt - a.createdAt);
-        setMessages(sortedMessages);
-      });
-      const received = collection(firestore, `${receiverId}/${senderId}/message`);
-      const sortedQuery2 = query(received, orderBy("createdAt", "desc"));
-      onSnapshot(sortedQuery2, (snapshot) => {
-        
-        const uniqueMessages = [];
-        snapshot.docs.forEach((doc) => {
-          const message = {
-            _id: doc.id,
-            text: doc.data().text,
-            createdAt: doc.data().createdAt,
-            user: {
-              _id: receiverId,
-              // avatar:receiverViewLink
-            },
-          };
-          // Check if the message already exists in uniqueMessages array based on its _id
-          const existingMessageIndex = uniqueMessages.findIndex((m) => m._id === message._id);
-          if (existingMessageIndex === -1) {
-            // If not found, add the message to the array
-            uniqueMessages.push(message);
-          } else {
-            // If found, update the message in the array
-            uniqueMessages[existingMessageIndex] = message;
-          }
-        });
 
-        // Sort messages from the latest to the oldest based on createdAt timestamp
-        const sortedMessages = [...messages, ...uniqueMessages].sort((a, b) => b.createdAt - a.createdAt);
-setMessages(sortedMessages);
-      }
-      );
+      const unsub = onSnapshot(sortedQuery, (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          _id: doc.id,
+          text: doc.data().text,
+          createdAt: doc.data().createdAt,
+          user: {
+            _id: doc.data().senderId,
+            avatar: receiverAvatarViewLink,
+          },
+        }));
+        // console.log(data);
+        setMessages(data);
+      });
     };
 
     fetchUserData();
-
   }, []); // Empty dependency array to run the effect only once on component mount
   const onSend = useCallback((message) => {
-    const initialMessage = {
+    const initialMessageSent = {
       text: message[0].text,
       createdAt: message[0].createdAt.getTime(),
+      senderId: senderId,
     };
+    // const initialMessageReceived = {
+    //   text: message[0].text,
+    //   createdAt: message[0].createdAt.getTime(),
+    //   senderId: receiverId,
+    // };
 
-    const messageRef = collection(firestore, senderId, receiverId, "message");
-    addDoc(messageRef, initialMessage);
+    const messageRef = collection(firestore, "messages");
+    addDoc(
+      collection(firestore, senderId, receiverId, "messages"),
+      initialMessageSent
+    );
+    addDoc(
+      collection(firestore, receiverId, senderId, "messages"),
+
+      initialMessageSent
+    );
 
     //update latestmessage
     setDoc(
@@ -110,7 +81,7 @@ setMessages(sortedMessages);
         latestMessage: message[0].text,
         senderAvatarViewLink: senderAvatarViewLink,
         receiverAvatarViewLink: receiverAvatarViewLink,
-        receiverName:receiverName
+        receiverName: receiverName,
       },
       { merge: true }
     );
@@ -120,7 +91,7 @@ setMessages(sortedMessages);
         latestMessage: message[0].text,
         senderAvatarViewLink: receiverAvatarViewLink,
         receiverAvatarViewLink: senderAvatarViewLink,
-        receiverName:senderName
+        receiverName: senderName,
       },
       { merge: true }
     );
