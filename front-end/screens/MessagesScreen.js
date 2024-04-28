@@ -77,7 +77,6 @@ const MessagesScreen = ({ navigation }) => {
 
   return (
     <Container>
-      <Text></Text>
       <ScrollView horizontal={false}>
         {messages.map((item) => (
           <Card

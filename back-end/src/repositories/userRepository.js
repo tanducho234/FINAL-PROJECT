@@ -7,7 +7,7 @@ class UserRepository {
   }
 
   async getUserByUsername(username) {
-    return await User.findOne({ username });
+    return await User.findOne({ username }).populate('role');
   }
   async getUserById(id) {
     return await User.findById(id);

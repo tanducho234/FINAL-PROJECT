@@ -220,7 +220,7 @@ const App = () => {
         <LoadingScreen />
       ) : isAuthenticated ? (
         <Tab.Navigator
-          initialRouteName="NotificationsTab"
+          initialRouteName="HomeStack"
           screenOptions={{
             tabBarActiveTintColor: "#e91e63",
           }}

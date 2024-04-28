@@ -54,7 +54,6 @@ const MyBooksScreen = ({ navigation }) => {
   };
   useEffect(() => {
     // Fetch user's books from the backend API
-
     fetchUserData();
 
     // Listen for focus events on the screen
@@ -86,30 +85,6 @@ const MyBooksScreen = ({ navigation }) => {
       setRefreshing(false);
       console.log("refresh done");
     });
-  };
-
-  const fetchImageLinkAndUpdate = async (book) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/image/getviewlink/${book.imagePath}`,
-        {
-          headers: {
-            Authorization: `Bearer ${await AsyncStorage.getItem("token")}`,
-          },
-        }
-      );
-      const imageLink = response.data.viewLink; // Assuming the response contains the image link
-      return { ...book, imageLink }; // Return updated book object with image link
-    } catch (error) {
-      console.error("Error fetching image link:", error);
-      return book; // Return original book object if error occurs
-    }
-  };
-
-  // Function to fetch image links for all books
-  const fetchImageLinksForBooks = async (books) => {
-    const updatedBooks = await Promise.all(books.map(fetchImageLinkAndUpdate));
-    return updatedBooks;
   };
   const handleBookPress = async (bookId, imageLink) => {
     navigation.navigate("EditBook", { bookId: bookId, imageLink: imageLink });
@@ -194,7 +169,7 @@ const MyBooksScreen = ({ navigation }) => {
                         book.status === "Unavailable" ? "gray" : "#063970",
                     },
                   ]}
-                  onPress={() => handleBookPress(book._id, book.imageLink)}
+                  onPress={() => handleBookPress(book._id, book.viewLink)}
                 >
                   <Text style={styles.borrowButtonText}>Edit this book</Text>
                 </TouchableOpacity>

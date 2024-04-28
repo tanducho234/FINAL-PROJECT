@@ -21,6 +21,14 @@ const bookSchema = new mongoose.Schema({
   borrower: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   desc: String,
   depositFee: { type: Number, default: 0 },
+  
+  comments: [
+    {
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to the user who made the comment
+      comment: String, // Comment content
+      createdAt: { type: Date, default: Date.now } // Date of comment creation
+    }
+  ]
 });
 
 const Book = mongoose.model("Book", bookSchema);

@@ -98,7 +98,7 @@ class UserController {
         });
       }
       const token = jwt.sign(
-        { id: user._id, username: user.username },
+        { id: user._id, username: user.username,role: user.role.roleName },
         secretKey,
         { expiresIn: "7d" }
       );

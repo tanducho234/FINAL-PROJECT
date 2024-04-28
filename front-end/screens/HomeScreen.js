@@ -283,8 +283,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleBookPress = (bookId, imageLink) => {
-    navigation.navigate("Review"
-    , {
+    navigation.navigate("Review", {
       commenterId: "",
       bookId: bookId,
     });

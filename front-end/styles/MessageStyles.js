@@ -41,6 +41,7 @@ export const UserInfoText = styled.View`
   flex-direction: row;
   justify-content: space-between;
   margin-bottom: 5px;
+  margin-right:15px
 `;
 
 export const UserName = styled.Text`

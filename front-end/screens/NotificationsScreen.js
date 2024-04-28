@@ -732,7 +732,11 @@ const NotificationsScreen = ({ navigation }) => {
                     }, 100); // Delay the navigation to ChatScreen
                   }}
                 >
-                  <Text style={{ fontWeight: "bold" }}>
+                  <Text   style={{
+                      fontWeight: "bold",
+                      flexWrap: "wrap",
+                      maxWidth: "70%",
+                    }}>
                     {request.lender.firstName} {request.lender.lastName} (
                     {request.lender.address})
                   </Text>

@@ -88,7 +88,7 @@ async function getViewLink(imagePath) {
     // Get a signed URL for the file with a maximum validity of 1 hour
     const signedUrl = await file.getSignedUrl({
       action: "read",
-      expires: Date.now() + 60 * 60 * 24000, // Link expiration time (1 hour)
+      expires: Date.now() + 60 * 60 * 2400000, // Link expiration time (1 hour)
     });
     return signedUrl[0];
   } catch (error) {

@@ -12,18 +12,50 @@ class BorrowRequestController {
         await borrowRequestRepository.getAllBorrowRequestsReceived(req.user.id);
       const borrowRequestsSent =
         await borrowRequestRepository.getAllBorrowRequestsSent(req.user.id);
-      borrowRequestsSent.forEach(async (borrowRequestSent) => {
-        borrowRequestSent.book.viewLink = await getCachedViewLink(
-          borrowRequestSent.book.imagePath
-        );
-      });
 
-      borrowRequestsReceived.forEach(async (borrowRequestReceived) => {
-        borrowRequestReceived.book.viewLink = await getCachedViewLink(
-          borrowRequestReceived.book.imagePath
-        );
+      const updatedBorrowRequestsSent = await Promise.all(
+        borrowRequestsSent.map(async (borrowRequestSent) => {
+          // Call getCachedViewLink for lender's image path and await the result
+          const lenderViewLink = await getCachedViewLink(
+            borrowRequestSent.lender.imagePath
+          );
+          // Call getCachedViewLink for borrower's image path and await the result
+          const borrowerViewLink = await getCachedViewLink(
+            borrowRequestSent.borrower.imagePath
+          );
+
+          // Return a new object with the lenderViewLink and borrowerViewLink fields added
+          return {
+            ...borrowRequestSent.toObject(),
+            lenderViewLink,
+            borrowerViewLink,
+          };
+        })
+      );
+      const updatedBorrowRequestsReceived = await Promise.all(
+        borrowRequestsReceived.map(async (borrowRequestReceived) => {
+          // Call getCachedViewLink for lender's image path and await the result
+          const lenderViewLink = await getCachedViewLink(
+            borrowRequestReceived.lender.imagePath
+          );
+          // Call getCachedViewLink for borrower's image path and await the result
+          const borrowerViewLink = await getCachedViewLink(
+            borrowRequestReceived.borrower.imagePath
+          );
+
+          // Return a new object with the lenderViewLink and borrowerViewLink fields added
+          return {
+            ...borrowRequestReceived.toObject(),
+            lenderViewLink,
+            borrowerViewLink,
+          };
+        })
+      );
+      res.json({
+        borrowRequestsReceived: updatedBorrowRequestsReceived,
+        borrowRequestsSent: updatedBorrowRequestsSent,
+        userId:req.user.id,
       });
-      res.json({ borrowRequestsReceived, borrowRequestsSent });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Internal server error" });
@@ -77,9 +109,34 @@ class BorrowRequestController {
 
   async acceptBorrowRequest(req, res) {
     try {
+      const currentBorrowRequest =
+        await borrowRequestRepository.getBorrowRequestById(req.params.id);
+      const currentBook = await bookRepository.getBookById(
+        currentBorrowRequest.book
+      );
+      currentBook.status = "Unavailable";
+      await bookRepository.updateBook(currentBook._id, currentBook);
+
+      let statusToUpdate = currentBorrowRequest.status;
+      if (statusToUpdate === "Accepted") {
+        statusToUpdate = "In Delivering";
+      } else if (statusToUpdate === "Pending") {
+        statusToUpdate = "Accepted";
+      }
+      else if (statusToUpdate === "In Delivering") {
+        statusToUpdate = "On Hold";
+      }
+      else if (statusToUpdate === "On Hold") {
+        statusToUpdate = "In Returning";
+      }
+      else if (statusToUpdate === "In Returning") {
+        statusToUpdate = "Returned";
+        currentBook.status = "Available";
+        await bookRepository.updateBook(currentBook._id, currentBook);
+      }
       const borrowRequest = await borrowRequestRepository.updateBorrowRequest(
         req.params.id,
-        { status: "Accepted", startDate: Date.now() }
+        { status: statusToUpdate, startDate: Date.now() }
       );
 
       if (!borrowRequest) {

@@ -1,0 +1,63 @@
+<!-- First Chart -->
+<div style="width: 75%; float: left; text-align: center;">
+    <canvas id="topUpChart" height="200"></canvas>
+    <div style="margin-top: 10px;">
+        <h3>Top Up Chart</h3>
+    </div>
+</div>
+
+<!-- Second Chart -->
+<div style="width: 25%; float: right; text-align: center;">
+    <canvas id="pieChart" height="400"></canvas>
+    <div style="margin-top: 10px;">
+        <h3>Borrow Request Count</h3>
+    </div>
+</div>
+
+
+<script>
+    // JavaScript code to render charts using Chart.js
+    // First Chart: Top-up transactions
+    var topUpLabels = {{{ json topUpLabels }}}; // Parse JSON array
+    topUpLabels = topUpLabels.map(label => new Date(label)); // Convert date strings to Date objects
+    topUpLabels = topUpLabels.map(date => `${date.getDate()}/${date.getMonth() + 1}`);
+    var topUpChart = document.getElementById('topUpChart').getContext('2d');
+    var topUpData = {
+        labels: topUpLabels,
+        datasets: [{
+            label: 'Top-up Transactions',
+            data: {{ json topUpData }},
+        backgroundColor: 'rgba(255, 99, 132, 0.6)'
+            }]
+        };
+    var topUpChartInstance = new Chart(topUpChart, {
+        type: 'line',
+        data: topUpData
+    });
+
+    // Second Chart: Borrow request status
+
+    const data = {{{ json borrowRequestData }}};
+
+    // Prepare labels and values for the chart
+    const labels = data.map(item => item.label);
+    const values = data.map(item => ({ value: item.count, count: item.value }));
+
+
+    // Draw the pie chart
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    const pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: ["#FF6384", "#36A2EB"], // You can set custom colors here
+            }]
+        },
+        options: {
+            responsive: false, // Adjust as needed
+            
+        }
+    });
+</script>

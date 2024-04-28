@@ -1,0 +1,55 @@
+<div class="container">
+  {{#if errorMessage}}
+    <div class="mt-2 alert alert-danger" role="alert">
+      <span class="fas fa-exclamation-circle mr-1"></span>
+      {{errorMessage}}
+    </div>
+  {{/if}}
+
+  <div class="row justify-content-center">
+    <!-- Phần hiển thị hình ảnh -->
+    <div class="col-md-6 d-none d-md-block">
+      <img
+        src="https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/f57543188030125.659573c124f90.jpg"
+        class="img-fluid h-100"
+        alt="Image"
+        style="object-fit: cover;"
+      />
+    </div>
+    <div class="col-md-6">
+      <div class="card border-0 shadow rounded-3 my-5 bg-light">
+        <div class="card-body p-4 p-sm-5">
+          <h5 class="card-title text-center mb-5 fw-light fs-5">Sign In</h5>
+          <form action="/admin/login" method="POST" class="border rounded p-4 shadow">
+            <label for="username">Username</label>
+            <div class="form-floating mb-3">
+              <input
+                type="text"
+                id="username"
+                name="username"
+                class="form-control"
+                placeholder="aka123"
+                required
+              />
+            </div>
+            <div class="form-floating mb-3">
+              <label for="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-control"
+                placeholder="Password"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary btn-block"
+            >Login</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

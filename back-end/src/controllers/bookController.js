@@ -11,7 +11,7 @@ class BookController {
     try {
       const { title, author, genres, ISBN, desc, depositFee } = req.body;
       const genresArray = genres.split(",");
-      console.log("genres", genresArray);
+      // console.log("genres", genresArray);
       ///////upload image
       if (!req.file) {
         console.log("UPLOAD2");
@@ -56,7 +56,18 @@ class BookController {
     try {
       console.log("getAllBooksByOwner", req.user.id);
       const books = await bookRepository.getAllBooksByOwnerId(req.user.id);
-      res.json(books);
+
+      const booksWithViewLinks = await Promise.all(
+        books.map(async (book) => {
+          const viewLink = await getCachedViewLink(book.imagePath); // Generate view link for book image
+          return {
+            ...book.toObject(), // Convert Mongoose document to plain JavaScript object
+            viewLink: viewLink,
+          };
+        })
+      );
+
+      res.json(booksWithViewLinks);
     } catch (err) {
       res.status(500).json({ message: "Unable to fetch books" });
     }
@@ -113,10 +124,14 @@ class BookController {
 
   async getBookById(req, res) {
     try {
-      const book = await bookRepository.getBookById(req.params.id);
+      let book = await bookRepository.getBookById(req.params.id);
       if (!book) {
         return res.status(404).json({ message: "Book not found" });
       }
+      //get add viewlink to book
+      const viewLink = await getCachedViewLink(book.imagePath); // Generate view link for book image
+      book = book.toObject();
+      book.viewLink = viewLink;
       console.log("getBookById", book);
       res.json(book);
     } catch (err) {
@@ -147,6 +162,49 @@ class BookController {
       res.sendStatus(204);
     } catch (err) {
       res.status(500).json({ error: "Unable to delete the book" });
+    }
+  }
+  //add new comment for book
+  async addComment(req, res) {
+    try {
+      console.log("addComment", req.body, req.user.id, req.params.id);
+      const book = await bookRepository.addComment(
+        req.params.id,
+        req.body.comment,
+        req.user.id
+      );
+      if (!book) {
+        return res.status(404).json({ error: "Book not found" });
+      }
+      res.json(book);
+    } catch (err) {
+      res.status(500).json({ error: "Unable to add comment" });
+    }
+  }
+  async getComments(req, res) {
+    try {
+      const comments = await bookRepository.getComments(req.params.id);
+      if (!comments) {
+        return res.status(404).json({ error: "Book not found" });
+      }
+      const simplifiedComments = await Promise.all(
+        comments.map(async (comment) => {
+          const viewLink = await getCachedViewLink(comment.userId.imagePath);
+          const day = comment.createdAt.getDate();
+          const month = comment.createdAt.getMonth() + 1; // Month is zero-based, so add 1
+          const year = comment.createdAt.getFullYear();
+          return {
+            username: comment.userId.firstName + " " + comment.userId.lastName,
+            comment: comment.comment,
+            viewLink: viewLink, // Save the view link in viewLink field
+            createdAt: `${day}/${month}/${year}`, // Concatenate day, month, and year
+          };
+        })
+      );
+
+      res.json(simplifiedComments);
+    } catch (err) {
+      res.status(500).json({ error: "Unable to get comments" });
     }
   }
 }

@@ -54,6 +54,7 @@ const AccountBalanceScreen = ({ navigation }) => {
       });
       setBalance(response.data.accountBalance);
       setUserId(response.data.userId);
+      setFullName(response.data.fullName);
     } catch (error) {
       console.error("Error fetching account balance:", error);
     } finally {
@@ -76,7 +77,7 @@ const AccountBalanceScreen = ({ navigation }) => {
         }
       );
       // Handle response (e.g., open payment URL in a webview)
-      console.log("Payment URL:", response.data.vnpUrl);
+      // console.log("Payment URL:", response.data.vnpUrl);
       await WebBrowser.openBrowserAsync(response.data.vnpUrl);
     } catch (error) {
       console.error("Error initiating payment:", error);
@@ -135,6 +136,14 @@ const AccountBalanceScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.profileContainer}>
         <Text style={styles.profileText}>{fullName}</Text>
+
+        <Text style={styles.balanceText}>
+          {balance.toLocaleString("vi-VN", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          })}{" "}
+          ₫
+        </Text>
         <Text>
           Last transaction:
           {transactions.length > 0 ? (
@@ -161,46 +170,46 @@ const AccountBalanceScreen = ({ navigation }) => {
             <Text>No transactions yet</Text>
           )}
         </Text>
-        <Text style={styles.balanceText}>
-          {balance.toLocaleString("vi-VN", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          })}{" "}
-          ₫
-        </Text>
         {/* <Text>PNC Bank checking account</Text> */}
       </View>
       <View style={styles.profileContainer}>
         <View style={styles.settingRow}>
-          <Text style={styles.profileText}>Top-Up</Text>
-          <Button
-            title="Custom Amount"
-            onPress={handleCustomAmount}
-            disabled={loading}
-          />
+          <Text style={styles.profileText}>Top-Up option:</Text>
+          <View>
+            <Button
+              type="clear"
+              title="Custom Amount"
+              onPress={handleCustomAmount}
+              disabled={loading}
+            />
+          </View>
         </View>
         <View style={styles.settingRow}>
-          <Button
-            title="100.000 ₫"
-            onPress={() => initiatePayment(100000)}
-            disabled={loading}
-          />
-          <Button
-            title="200.000 ₫"
-            onPress={() => initiatePayment(200000)}
-            disabled={loading}
-          />
+          <View style={{ flex: 1 }}>
+            <Button
+              buttonStyle={{ borderRadius: 20 }}
+              title="100.000 ₫"
+              type="clear"
+              onPress={() => initiatePayment(100000)}
+              disabled={loading}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Button
+              type="clear"
+              title="200.000 ₫"
+              onPress={() => initiatePayment(200000)}
+              disabled={loading}
+            />
+          </View>
         </View>
       </View>
 
       <View style={styles.profileContainer}>
         <Text style={styles.profileText}>Transaction History</Text>
-        <FlatList
-          style={{ marginBottom: 250, marginTop: 20 }}
-          data={transactions}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <View style={styles.transactionItem}>
+        <ScrollView style={{ marginBottom: 300, marginTop: 20 }}>
+          {transactions.map((item) => (
+            <View key={item._id} style={styles.transactionItem}>
               <View style={styles.settingRow}>
                 <View>
                   <Text style={{ fontWeight: "bold" }}>{item.description}</Text>
@@ -208,6 +217,7 @@ const AccountBalanceScreen = ({ navigation }) => {
                     {new Date(item.transactionDate).toLocaleString("vi-VN")}
                   </Text>
                 </View>
+                <View style={{ flex: 1 }}></View>
                 <Text
                   style={{
                     color:
@@ -225,8 +235,8 @@ const AccountBalanceScreen = ({ navigation }) => {
                 </Text>
               </View>
             </View>
-          )}
-        />
+          ))}
+        </ScrollView>
       </View>
     </View>
   );
@@ -259,7 +269,6 @@ const styles = StyleSheet.create({
   },
   settingRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     margin: 8,
   },

@@ -12,7 +12,11 @@ class BorrowRequestRepository {
     return await BorrowRequest.find({ lender: lender })
       .populate({
         path: "borrower",
-        select: "firstName lastName", // Specify the fields you want to populate from the genres collection
+        select: "firstName lastName imagePath address", // Specify the fields you want to populate from the genres collection
+      })
+      .populate({
+        path: "lender",
+        select: "firstName lastName imagePath address", // Specify the fields you want to populate from the genres collection
       })
       .populate("book");
   }
@@ -20,8 +24,12 @@ class BorrowRequestRepository {
   async getAllBorrowRequestsSent(borrower) {
     return await BorrowRequest.find({ borrower: borrower })
       .populate({
+        path: "borrower",
+        select: "firstName lastName imagePath address", // Specify the fields you want to populate from the genres collection
+      })
+      .populate({
         path: "lender",
-        select: "firstName lastName", // Specify the fields you want to populate from the genres collection
+        select: "firstName lastName imagePath address", // Specify the fields you want to populate from the genres collection
       })
       .populate("book");
   }
@@ -32,6 +40,9 @@ class BorrowRequestRepository {
 
   async deleteBorrowRequest(id) {
     return await BorrowRequest.findByIdAndDelete(id);
+  }
+  async getBorrowRequestById(id) {
+    return await BorrowRequest.findById(id);
   }
 }
 

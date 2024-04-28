@@ -12,7 +12,7 @@ const borrowRequestSchema = new mongoose.Schema({
   book: { type: mongoose.Schema.Types.ObjectId, ref: "Book", required: true },
   status: {
     type: String,
-    enum: ["Pending", "Accepted", "Rejected"],
+    enum: ["Pending", "Accepted", "Rejected","In Delivering","On Hold","In Returning","Returned"],
     default: "Pending",
   },
   startDate: { type: Date },

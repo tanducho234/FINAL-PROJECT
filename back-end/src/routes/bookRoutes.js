@@ -10,7 +10,8 @@ router.post("/", upload.single("image"), bookController.createBook);
 router.get("/", bookController.getAllBooksByOwner);
 
 router.get("/all", bookController.getAllBooks);
-
+router.post("/:id/comment", bookController.addComment);
+router.get("/:id/comment", bookController.getComments);
 // Get a book by ID
 router.get("/:id", bookController.getBookById);
 
