@@ -5,8 +5,13 @@ const helpers = require("./handlebarsHelpers");
 const { engine } = require("express-handlebars");
 const path = require("path");
 const routes = require("./routes");
+const swaggerSetup = require('./routes/swagger');
+
 
 const app = express();
+
+swaggerSetup(app);
+
 const dotenv = require("dotenv");
 
 // const productRoutes = require("./src/routes/productRoutes");

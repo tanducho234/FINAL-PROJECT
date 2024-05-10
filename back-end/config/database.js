@@ -19,7 +19,6 @@ const connectToDatabase = async () => {
 
     const changeStream = collection.watch();
     const wss = new WebSocket.Server({ port: 8080 });
-    // console.log(wss)
 
     changeStream.on("change", async (change) => {
       try {

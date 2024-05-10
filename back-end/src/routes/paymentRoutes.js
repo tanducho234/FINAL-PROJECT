@@ -10,9 +10,9 @@ router.get("/", function (req, res, next) {
   res.redirect("/admin/login");
 });
 
-router.get("/create_payment_url", function (req, res, next) {
-  res.render("order", { title: "Tạo mới đơn hàng", amount: 10000 });
-});
+// router.get("/create_payment_url", function (req, res, next) {
+//   res.render("order", { title: "Tạo mới đơn hàng", amount: 10000 });
+// });
 
 router.post("/create_payment_url", function (req, res, next) {
   process.env.TZ = "Asia/Ho_Chi_Minh";

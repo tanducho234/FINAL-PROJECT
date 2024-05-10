@@ -76,33 +76,33 @@ const EditBookScreen = ({ navigation, route }) => {
     fetchGenresData();
   }, []);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={async () => {
-            try {
-              const token = await AsyncStorage.getItem("token");
-              const response = await axios.delete(
-                `http://localhost:3000/books/${bookId}`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                }
-              );
-            } catch (error) {
-              console.error("Error deleting book:", error);
-              // Handle errors
-            }
-            navigation.navigate("MyBooks");
-          }}
-        >
-          <Icon marginRight={20} name="delete" size={30} color="red" />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
+  // useLayoutEffect(() => {
+  //   navigation.setOptions({
+  //     headerRight: () => (
+  //       <TouchableOpacity
+  //         onPress={async () => {
+  //           try {
+  //             const token = await AsyncStorage.getItem("token");
+  //             const response = await axios.delete(
+  //               `http://localhost:3000/books/${bookId}`,
+  //               {
+  //                 headers: {
+  //                   Authorization: `Bearer ${token}`,
+  //                 },
+  //               }
+  //             );
+  //           } catch (error) {
+  //             console.error("Error deleting book:", error);
+  //             // Handle errors
+  //           }
+  //           navigation.navigate("MyBooks");
+  //         }}
+  //       >
+  //         <Icon marginRight={20} name="delete" size={30} color="red" />
+  //       </TouchableOpacity>
+  //     ),
+  //   });
+  // }, [navigation]);
 
   const toggleGenre = (genreId) => {
     const index = selectedGenres.indexOf(genreId);

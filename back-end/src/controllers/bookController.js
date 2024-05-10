@@ -102,14 +102,10 @@ class BookController {
           };
         })
       );
-
-      // for (let i = booksWithViewLinks.length - 1; i > 0; i--) {
-      //   const j = Math.floor(Math.random() * (i + 1));
-      //   [booksWithViewLinks[i], booksWithViewLinks[j]] = [booksWithViewLinks[j], booksWithViewLinks[i]];
-      // }
-
-      // console.log("Number of books:", booksWithoutCurrentUser.length); // Log the number of books
-      console.log(user.favoriteBooks);
+       for (let i = booksWithViewLinks.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [booksWithViewLinks[i], booksWithViewLinks[j]] = [booksWithViewLinks[j], booksWithViewLinks[i]];
+      }
       res.json({
         books: booksWithViewLinks,
         favoriteBooks: user.favoriteBooks,
@@ -176,7 +172,7 @@ class BookController {
       if (!book) {
         return res.status(404).json({ error: "Book not found" });
       }
-      res.json(book);
+      res.status(201).json({ message: "comment added successfully." });
     } catch (err) {
       res.status(500).json({ error: "Unable to add comment" });
     }

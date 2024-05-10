@@ -67,7 +67,7 @@ router.post("/login", async (req, res) => {
       httpOnly: true,
       maxAge: 5 * 3600 * 1000, // Set cookie expiration time to 1 hour (in milliseconds)
     });
-    console.log("token", token);
+    // console.log("token", token);
 
     res.redirect("home");
   } catch (error) {
@@ -84,11 +84,9 @@ router.get("/genre", adminMiddleware, async (req, res) => {
   const totalPages = Math.ceil(genresCount / perPage);
   const startIndex = (page - 1) * perPage;
 
-  const genres = (await Genre.find()
-    .sort({ name: 1 })
-    .skip(startIndex)
-    .limit(perPage)
-).map((genre) => genre.toObject());
+  const genres = (
+    await Genre.find().sort({ name: 1 }).skip(startIndex).limit(perPage)
+  ).map((genre) => genre.toObject());
 
   const pages = [];
   for (let i = 1; i <= totalPages; i++) {
@@ -144,6 +142,63 @@ router.post("/genre/delete/:id", adminMiddleware, async (req, res) => {
     console.error("Error deleting genre:");
     res.status(500).send("Server error");
   }
+});
+//borrow
+
+router.get("/borrow", adminMiddleware, async (req, res) => {
+  const page = req.query.page || 1; // Default to page 1 if no page parameter is provided
+  const perPage = 10; // Number of items per page
+
+  const borrowRequestsCount = await BorrowRequest.countDocuments();
+  const totalPages = Math.ceil(borrowRequestsCount / perPage);
+  const startIndex = (page - 1) * perPage;
+
+  const borrowRequests = (
+    await BorrowRequest.find()
+      .sort({ createdAt: -1 }) // Sort by creation date, you can change this according to your requirement
+      .skip(startIndex)
+      .limit(perPage)
+  ).map((request) => request.toObject());
+
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pages.push(i);
+  }
+  borrowRequests.forEach((request) => {
+    request.shortenedId = request._id.toString().slice(-4);
+  });
+
+  res.render("borrow", {
+    borrowRequests,
+    authen: true,
+    activePage: "borrow",
+    currentPage: page,
+    totalPages: totalPages,
+    pages,
+  });
+});
+
+//edit borrow
+router.get("/borrow/edit/:id", adminMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const borrowRequest = await BorrowRequest.findById(id);
+  res.render("borrow-edit", {
+    borrowRequest: borrowRequest.toObject(),
+    authen: true,
+    activePage: "borrow",
+  });
+});
+
+//post edit
+
+router.post("/borrow/edit/:id", adminMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { status, depositFee } = req.body;
+  const borrowRequest = await BorrowRequest.findByIdAndUpdate(id, {
+    status,
+    depositFee,
+  });
+  res.redirect("/admin/borrow");
 });
 
 //chart

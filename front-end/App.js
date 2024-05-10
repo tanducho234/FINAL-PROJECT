@@ -266,7 +266,6 @@ const App = () => {
               ),
             }}
           />
-          {/* tab screen for message */}
           <Tab.Screen
             name="Message"
             component={MessageStack}

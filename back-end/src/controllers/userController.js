@@ -98,11 +98,11 @@ class UserController {
         });
       }
       const token = jwt.sign(
-        { id: user._id, username: user.username,role: user.role.roleName },
+        { id: user._id, username: user.username, role: user.role.roleName },
         secretKey,
         { expiresIn: "7d" }
       );
-      res.json({ token,userId: user._id });
+      res.json({ token, userId: user._id });
     } catch (err) {
       res.status(500).json({ message: "Unable to log in" });
     }
@@ -204,7 +204,7 @@ class UserController {
       res.status(500).json({ error: "Unable to update account balance" });
     }
   }
-  async addToFavourite(req, res) {
+  async updateFavouriteBookList(req, res) {
     const userId = req.user.id;
     const bookId = req.body.bookId;
     try {

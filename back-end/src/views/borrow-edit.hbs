@@ -1,0 +1,50 @@
+<div class="container mt-4">
+  <h1 class="text-center mb-4">
+    Edit Borrow Request
+  </h1>
+  <div class="row mt-4">
+    <div class="col-md-6 offset-md-3">
+      <div class="card">
+        <div class="card-body">
+          <form action="" method="POST">
+            <div class="form-group">
+              <label for="borrower">ID:</label>
+              <input type="text" class="form-control rounded-pill shadow-sm" id="id" name="borrower" value="{{borrowRequest._id}}" readonly />
+            </div>
+            <div class="form-group">
+              <label for="borrower">Borrower:</label>
+              <input type="text" class="form-control rounded-pill shadow-sm" id="borrower" name="borrower" value="{{borrowRequest.borrower}}" readonly />
+            </div>
+            <div class="form-group">
+              <label for="lender">Lender:</label>
+              <input type="text" class="form-control rounded-pill shadow-sm" id="lender" name="lender" value="{{borrowRequest.lender}}" readonly />
+            </div>
+            <div class="form-group">
+              <label for="book">Book:</label>
+              <input type="text" class="form-control rounded-pill shadow-sm" id="book" name="book" value="{{borrowRequest.book}}" readonly />
+            </div>
+            <div class="form-group">
+              <label for="status">Status:</label>
+              <select class="form-control rounded-pill shadow-sm" id="status" name="status" required>
+                <option value="Pending" {{#ifEquals borrowRequest.status "Pending"}}selected{{/ifEquals}}>Pending</option>
+                <option value="Accepted" {{#ifEquals borrowRequest.status "Accepted"}}selected{{/ifEquals}}>Accepted</option>
+                <option value="Rejected" {{#ifEquals borrowRequest.status "Rejected"}}selected{{/ifEquals}}>Rejected</option>
+                <option value="In Delivering" {{#ifEquals borrowRequest.status "In Delivering"}}selected{{/ifEquals}}>In Delivering</option>
+                <option value="On Hold" {{#ifEquals borrowRequest.status "On Hold"}}selected{{/ifEquals}}>On Hold</option>
+                <option value="In Returning" {{#ifEquals borrowRequest.status "In Returning"}}selected{{/ifEquals}}>In Returning</option>
+                <option value="Returned" {{#ifEquals borrowRequest.status "Returned"}}selected{{/ifEquals}}>Returned</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="depositFee">Deposit Fee:</label>
+              <input type="number" class="form-control rounded-pill shadow-sm" id="depositFee" name="depositFee" value="{{borrowRequest.depositFee}}" required />
+            </div>
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary rounded-pill shadow">Update</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

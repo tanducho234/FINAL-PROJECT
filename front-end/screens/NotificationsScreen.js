@@ -34,18 +34,24 @@ const NotificationsScreen = ({ navigation }) => {
     });
   };
 
+  const handleAddReview = (bookId,userId) => {
+    console.log("AAA",userId)
+    navigation.navigate("Review", {
+      commenterId: userId,
+      bookId: bookId,
+    });
+  };
   useEffect(() => {
     fetchRequestsFromBorrowers();
 
     const ws = new WebSocket("ws://localhost:8080");
-    console.log(ws);
+    // console.log(ws);
 
     ws.onmessage = async (event) => {
       const message = event.data;
       const messageData = JSON.parse(message);
       tempUserId = await AsyncStorage.getItem("userId");
       console.log("userId", tempUserId, "  ", messageData);
-      // Access individual fields from the message data object
       const id1 = messageData.id1;
       const id2 = messageData.id2;
       const type = messageData.type;
@@ -55,21 +61,11 @@ const NotificationsScreen = ({ navigation }) => {
         id2 === tempUserId ||
         type === "BorrowRequestDeleted"
       ) {
-        // fetchAllBorrowBookRequest(); // Call your fetch function
-        console.log("BorrowRequestChange");
         handleRefresh();
       }
     };
-
-    // const focusSubscription = navigation.addListener("focus", () => {
-    //   // Refetch user's books when the screen gains focus
-    //   fetchRequestsFromBorrowers();
-    // });
-
-    // Clean up the subscription
     return () => {
       ws.close();
-      // focusSubscription();
     };
   }, [navigation]);
 
@@ -312,7 +308,7 @@ const NotificationsScreen = ({ navigation }) => {
 
               // Update user's balance
               const updatedBalance = await axios.post(
-                `http://localhost:3000/users/update-balance`,
+                `http://localhost:3000/users/balance`,
                 {
                   user_id: userId, // Assuming userId is already defined in the component
                   amount: depositFee, // Subtracting the deposit fee from the balance
@@ -422,7 +418,7 @@ const NotificationsScreen = ({ navigation }) => {
 
               // Update user's balance
               const updatedBalance = await axios.post(
-                `http://localhost:3000/users/update-balance`,
+                `http://localhost:3000/users/balance`,
                 {
                   user_id: userId, // Assuming userId is already defined in the component
                   amount: depositFee, // Subtracting the deposit fee from the balance
@@ -732,11 +728,13 @@ const NotificationsScreen = ({ navigation }) => {
                     }, 100); // Delay the navigation to ChatScreen
                   }}
                 >
-                  <Text   style={{
+                  <Text
+                    style={{
                       fontWeight: "bold",
                       flexWrap: "wrap",
                       maxWidth: "70%",
-                    }}>
+                    }}
+                  >
                     {request.lender.firstName} {request.lender.lastName} (
                     {request.lender.address})
                   </Text>
@@ -914,6 +912,18 @@ const NotificationsScreen = ({ navigation }) => {
                     >
                       Your Deposit Fee has been refunded!
                     </Text>
+                    <Button
+                      disabled={refreshing}
+                      textStyle={{ color: 'green', textDecorationLine: 'underline' }}
+                      title="Leave a review about the book?"
+                      onPress={() =>
+                        handleAddReview(
+                          request.book._id,
+                          request.borrower._id
+                        )
+                      }
+                      color="blue"
+                    />
                   </View>
                 )}
               </View>

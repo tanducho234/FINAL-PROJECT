@@ -11,7 +11,6 @@ const LoginScreen = ({ route, navigation }) => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleLogin = async () => {
-    console.log("handle login");
     axios
       .post(`http://localhost:3000/login`, {
         username: username,
@@ -19,23 +18,16 @@ const LoginScreen = ({ route, navigation }) => {
       })
       .then(async (res) => {
         setErrorMessage("");
-        console.log("login thanh cong");
         await AsyncStorage.setItem("token", res.data.token);
         await AsyncStorage.setItem("userId", res.data.userId);
 
         setIsAuthenticated(true);
-        // navigation.navigate('Home',{ username: 'exampleUser' });
       })
       .catch(
         (error) => {
           setErrorMessage("Username or Password does not match"),
             console.log(error);
         }
-        //   Alert.alert(
-        //   'Login Failed',
-        //   error.response.data.message,
-        //   [{ text: 'OK', onPress: () => console.log('OK pressed') }]
-        // )
       );
   };
 

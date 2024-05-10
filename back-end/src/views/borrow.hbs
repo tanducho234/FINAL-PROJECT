@@ -1,0 +1,129 @@
+{{!-- borrow --}}
+<div class="container mt-4">
+  <h1 class="text-center mb-4">
+    Manage Borrow Requests
+  </h1>
+
+  <!-- List of Borrow Requests -->
+  <div class="row">
+    <div class="col-md-12">
+      <h2>
+        Borrow Requests
+      </h2>
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered text-center rounded shadow"
+          style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(7px);">
+          <thead class="thead-light">
+            <tr>
+              <th scope="col" style="background-color: #e9ecef;">
+                ID
+              </th>
+              <!-- Add more table headers as needed -->
+              <th scope="col" style="background-color: #e9ecef;">
+                Borrower ID
+              </th>
+              <th scope="col" style="background-color: #e9ecef;">
+                Lender ID
+              </th>
+              <th scope="col" style="background-color: #e9ecef;">
+                Book ID
+              </th>
+              <th scope="col" style="background-color: #e9ecef;">
+                Status
+              </th>
+              <th scope="col" style="background-color: #e9ecef;">
+                Date Created
+              </th>
+              <th scope="col" style="background-color: #e9ecef;">
+                Deposit Fee
+              </th>
+              <th scope="col" style="background-color: #d8e4e8;">
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each borrowRequests}}
+            <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">
+              <span class="copyable-id" data-id="{{this._id}}" title={{this._id}}>{{this._id}}</span>
+            </td>
+             <!-- Borrower -->
+            <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">
+    <span class="copyable-id" data-id="{{this.borrower}}" title="{{this.borrower}}">{{this.borrower}}</span>
+  </td>
+  <!-- Lender -->
+            <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">
+    <span class="copyable-id" data-id="{{this.lender}}" title="{{this.lender}}">{{this.lender}}</span>
+  </td>
+  <!-- Book -->
+            <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">
+    <span class="copyable-id" data-id="{{this.book}}" title="{{this.book}}">{{this.book}}</span>
+  </td>
+            <td>
+              {{this.status}}
+            </td>
+            <td>
+              {{formatDateForView this.createdAt}}
+            </td>
+            <td>
+              {{this.depositFee}}
+            </td>
+            <td>
+              <div class="d-flex justify-content-center">
+                <a href="borrow/edit/{{this._id}}/" class="btn btn-sm btn-primary rounded-pill shadow mr-2">
+                  Edit
+                </a>
+                {{!-- <form action="/borrow/delete/{{this._id}}" method="POST" style="display: inline;">
+                  <button type="submit" class="btn btn-sm btn-danger rounded-pill shadow">Delete</button>
+                </form> --}}
+              </div>
+            </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Pagination -->
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+    {{#if (gt totalPages 1)}}
+    {{#if (gt currentPage 1)}}
+    <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+    <li class="page-item"><a class="page-link" href="?page={{sub currentPage 1}}">Previous</a></li>
+    {{/if}}
+    {{#each pages}}
+    <li class="page-item {{#if (eq this ../currentPage)}}active{{/if}}"><a class="page-link"
+        href="?page={{this}}">{{this}}</a></li>
+    {{/each}}
+    {{#if (lt currentPage totalPages)}}
+    <li class="page-item"><a class="page-link" href="?page={{add currentPage 1}}">Next</a></li>
+    <li class="page-item"><a class="page-link" href="?page={{totalPages}}">Last</a></li>
+    {{/if}}
+    {{/if}}
+  </ul>
+</nav>
+<script>
+  // Find all elements with the class "copyable-id"
+  document.querySelectorAll('.copyable-id').forEach(item => {
+    // Add click event listener to each element
+    item.addEventListener('click', event => {
+      // Create a temporary textarea element
+      const textarea = document.createElement('textarea');
+      // Set the value of the textarea to the data-id attribute of the clicked element
+      textarea.value = event.target.dataset.id;
+      // Append the textarea to the document body
+      document.body.appendChild(textarea);
+      // Select the content of the textarea
+      textarea.select();
+      // Copy the selected text to the clipboard
+      document.execCommand('copy');
+      // Remove the textarea from the document body
+      document.body.removeChild(textarea);
+      // Show a confirmation message (optional)
+      alert('Copied to clipboard: ' + event.target.dataset.id);
+    });
+  });
+</script>

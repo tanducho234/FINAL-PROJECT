@@ -15,8 +15,6 @@ const borrowRequestSchema = new mongoose.Schema({
     enum: ["Pending", "Accepted", "Rejected","In Delivering","On Hold","In Returning","Returned"],
     default: "Pending",
   },
-  startDate: { type: Date },
-  returnDate: { type: Date },
   createdAt: { type: Date, default: Date.now },
   depositFee: { type: Number, default: 0 },
 });

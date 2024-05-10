@@ -89,7 +89,6 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const fetchUserData = async (isFavourite) => {
-    console.log("fetchAllall");
     try {
       const response = await axios.get(`http://localhost:3000/books/all`, {
         headers: {
@@ -100,21 +99,13 @@ const HomeScreen = ({ navigation }) => {
       setUserId(response.data.userId);
       setUserViewLink(response.data.userViewLink);
       setUserFullName(response.data.userFullName);
-
-      // for (let i = books.length - 1; i > 0; i--) {
-      //   const j = Math.floor(Math.random() * (i + 1));
-      //   [books[i], books[j]] = [books[j], books[i]];
-      // }
-
       setAllBooks(books);
-      setPageNumber(1); // Reset page number to 1 after fetching data
+      setPageNumber(1); 
       const initialBooks = books.slice(0, pageSize);
       setFilteredBooks(initialBooks);
-      //setFavouritebook
       setFavouritesBooks(response.data.favoriteBooks);
       setIsShowingFavouriteBook(false);
 
-      // console.log("fetchAll", response.data.favoriteBooks);
     } catch (error) {
       Alert.alert("Error", error.message, [
         { text: "OK", onPress: () => console.log("OK pressed") },
@@ -126,25 +117,6 @@ const HomeScreen = ({ navigation }) => {
     console.log("useEffect");
     fetchUserData();
   }, []);
-
-  // useLayoutEffect(() => {
-  //   console.log("useLayoutEffect");
-  //   navigation.setOptions(
-  //     {
-  //       headerRight: () => (
-  //         <TouchableOpacity  onPress={() => handleShowFavouriteBooksList()}>
-  //           <Icon
-  //             marginRight={20}
-  //             name="playlist-star"
-  //             size={30}
-  //             color={isShowingFavouriteBook ? "yellow" : "black"}
-  //           />
-  //         </TouchableOpacity>
-  //       ),
-  //     },
-  //     [isShowingFavouriteBook]
-  //   );
-  // }, []);
   const handleShowFavouriteBooksList = async () => {
     console.log(
       "handleShowFavouriteBooksList",
@@ -163,7 +135,7 @@ const HomeScreen = ({ navigation }) => {
   const handleAddFavouriteBooksList = async (bookId) => {
     try {
       const response = await axios.post(
-        `http://localhost:3000/users/add-to-favourite`,
+        `http://localhost:3000/users/favourite-book`,
         {
           bookId: bookId,
         },
@@ -259,7 +231,7 @@ const HomeScreen = ({ navigation }) => {
         );
         // Update user's account balance
         const updatedBalance = await axios.post(
-          `http://localhost:3000/users/update-balance`,
+          `http://localhost:3000/users/balance`,
           {
             user_id: userId, // Assuming userId is already defined in the component
             amount: -amount, // Subtracting the deposit fee from the balance
@@ -282,7 +254,7 @@ const HomeScreen = ({ navigation }) => {
       });
   };
 
-  const handleBookPress = (bookId, imageLink) => {
+  const handleBookPress = (bookId) => {
     navigation.navigate("Review", {
       commenterId: "",
       bookId: bookId,
@@ -384,7 +356,7 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.bookContainer} key={book._id}>
             <View style={styles.bookContainerLeft}>
               <Pressable
-                onPress={() => handleBookPress(book._id, book.imageLink)}
+                onPress={() => handleBookPress(book._id)}
               >
                 <Image
                   source={{ uri: book.viewLink }}

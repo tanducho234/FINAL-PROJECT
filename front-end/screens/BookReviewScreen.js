@@ -2,6 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { Input } from "@rneui/base";
+
 import {
   Container,
   Card,
@@ -35,6 +37,8 @@ const BookReviewScreen = ({ route, nagivation }) => {
   const bookId = route.params.bookId;
   const [comments, setComments] = useState([]);
   const [book, setBook] = useState("");
+  const [comment, setComment] = useState("");
+
   const fetchBookData = async () => {
     console.log("fetchBookData", bookId);
     const token = await AsyncStorage.getItem("token");
@@ -56,7 +60,6 @@ const BookReviewScreen = ({ route, nagivation }) => {
         ])
       );
     await axios
-
       .get(`http://localhost:3000/books/${bookId}/comment`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -78,8 +81,42 @@ const BookReviewScreen = ({ route, nagivation }) => {
     console.log("bookId", bookId);
     fetchBookData();
   }, []);
+  const handleAddNewComment = async (comment) => {
+    const token = await AsyncStorage.getItem("token");
+    await axios
+      .post(
+        `http://localhost:3000/books/${bookId}/comment`,
+        {
+          comment: comment,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then(async (res) => {
+        console.log("add new comment thanh congthanh cong");
+        console.log("res.data", res.data);
+        setComment("")
+        fetchBookData();
+      })
+      .catch((error) =>
+        Alert.alert("add comment fail", error.response.data.message, [
+          { text: "OK", onPress: () => console.log("OK pressed") },
+        ])
+      );
+  };
+  const showDescription = (desc) => {
+    Alert.alert(
+      "Book Description",
+      desc,
+      { text: "Got it!" },
+      { cancelable: true }
+    );
+  };
 
-  const showDescription = (genre) => {
+  const showGenreDescription = (genre) => {
     Alert.alert(
       genre.name,
       genre.description,
@@ -133,13 +170,17 @@ const BookReviewScreen = ({ route, nagivation }) => {
                 <TouchableOpacity
                   key={index}
                   style={styles.genreButton}
-                  onPress={() => showDescription(genre)}
+                  onPress={() => showGenreDescription(genre)}
                 >
                   <Text style={styles.bookGenre}>{genre.name}</Text>
                 </TouchableOpacity>
               ))}
           </View>
-          <Text style={styles.bookAuthor}>{book.desc}</Text>
+          <TouchableOpacity onPress={() => showDescription(book.desc)}>
+            <Text style={[styles.bookAuthor]} numberOfLines={3}>
+              {book.desc}
+            </Text>
+          </TouchableOpacity>
 
           {/* {book.depositFee !== undefined && (
             <Text style={styles.bookDepositFee}>
@@ -154,7 +195,7 @@ const BookReviewScreen = ({ route, nagivation }) => {
       </View>
       <Text style={styles.heading}>Comments</Text>
       <Container>
-        <ScrollView>
+        <ScrollView style={{ marginVertical: 20 }}>
           {comments.map((item, index) => (
             <Card key={index}>
               <UserInfo>
@@ -178,7 +219,27 @@ const BookReviewScreen = ({ route, nagivation }) => {
             </Card>
           ))}
         </ScrollView>
-        </Container>
+      </Container>
+      {commenterId !== "" && (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "flex-start",
+            alignItems: "center",
+            marginVer: 10,
+          }}
+        >
+          <TextInput
+            placeholder="Enter your review/comment"
+            style={styles.input}
+            value={comment}
+            onChangeText={setComment}
+          />
+          <TouchableOpacity onPress={() => handleAddNewComment(comment)}>
+            <Icon name="arrow-up-box" size={40} />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -233,6 +294,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   bookAuthor: {
+    marginTop: 5,
     fontSize: 14,
   },
   genreButton: {
@@ -287,6 +349,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold", // If the text is bold
     textAlign: "center", // Center the text inside the button
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 2,
+    borderRadius: 10,
+    paddingHorizontal: 10,
   },
 });
 
